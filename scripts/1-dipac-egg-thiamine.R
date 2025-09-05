@@ -20,6 +20,8 @@ bkd_fish <- c("f13", "f34")
 dipac_females <- dipac_f_meta_thiamine |> 
   filter(!(fish_id %in% bkd_fish))
 
+write_csv(dipac_females, file = "data/processed/dipac_females.csv")
+
 # Exploratory plots ------------------------------------------------------------
 
 ## Histogram -------------------------------------------------------------------
