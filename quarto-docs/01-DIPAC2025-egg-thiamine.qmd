@@ -1,0 +1,424 @@
+---
+title: "Chinook Egg Thiamine, Macaulay 2025"
+author: "Drew Porter"
+date-modified: today
+format: html
+lightbox: true
+editor: source
+toc: true
+code-fold: true
+output-file: "output"
+---
+
+## Introduction
+
+This report is an analysis of Chinook salmon egg thiamine. Eggs were collected
+from returning Chinook salmon at DIPAC's Macauley Hatchery in Juneau, AK on
+2025-08-15.
+
+For this analysis, individuals with eggs containing less than 5 nmol thiamine
+per gram are considered to be "thiamine deficient", this is the consensus literature
+value for deficient eggs. I am also interested in looking at thiamine on a per egg basis,
+I've classified individuals with less than 1 nmol thiamine per egg as deficient, 
+this is not an established criteria.
+
+### Glossary of Variables
+
+`fish_id`
+: A unique identifier for each fish
+
+`mid-eye-fork-length`
+: The length in millimeters for each fish, taken from the middle of the eye 
+to the fork in the caudal fin.
+
+`avg_egg_mass_g`
+: The average mass of an egg for each fish, measured in grams. Determined by 
+dividing the total mass of eggs by the number of eggs measured for thiamine analysis.
+
+`total_egg_mass_g`
+: The total mass of eggs, in grams, for each fish, measured at DIPAC after 
+fertilization and water hardening.
+
+`est_pre_hardened_egg_mass_g`
+: The estimated total mass of eggs, in grams, for each fish. Calculated by reducing
+the total egg mass by 23%, which is the estimated increase in salmon egg weight
+after water hardening, fertilization is not expected to significantly increase
+egg weight (Fleming and Ng, 1987).
+
+`est_fecund_n`
+: The total estimated fecundity, representing the total number of eggs produced 
+by each female. Calculated by dividing the estimated pre-hardening egg mass by
+the average egg mass.
+
+`nmolT_g`
+: Nanomoles of thiamine per gram of egg.
+
+`nmolT_egg`
+: Nanomoles of thiamine per egg.
+
+
+## Analysis
+
+```{r}
+#| label: setup
+#| output: false
+
+# Load libraries
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(knitr)
+library(ggpmisc)
+library(here)
+library(stringr) 
+library(ggridges)
+library(scales)
+
+# ggplot theme set
+theme_set(theme_bw())
+
+# color palette
+my_palette <- c("#1F77B4FF", "#FF7F0EFF", "#2CA02CFF", "#D62728FF", "#9467BDFF",
+                "#8C564BFF", "#E377C2FF", "#7F7F7FFF", "#BCBD22FF", "#17BECFFF")
+
+
+options(
+  ggplot2.discrete.colour = list(scale_color_manual(values = my_palette)),
+  ggplot2.discrete.fill = list(scale_fill_manual(values = my_palette))
+)
+
+```
+
+```{r}
+#| label: load-data
+#| output: false
+
+dipac25 <- read_rds(here("data/processed/dipac_females.rds"))
+
+dipac25_trim <- dipac25 |> 
+  select(fish_id, `mid-eye-fork-length`, avg_egg_mass_g, total_egg_mass_g,
+         est_pre_hardened_egg_mass_g, est_fecund_n, nmolT_g, deficient_conc, 
+         nmolT_egg, deficient_totalT)
+
+# These fish tested positive for BKD and cannot be included in the study
+bkd_fish <- c("f13", "f34")
+
+dipac25_bkd_trim <- dipac25_trim |> 
+  filter(!(fish_id %in% bkd_fish))
+
+names(dipac25_trim)
+
+```
+### Histograms
+
+```{r}
+#| label: histogram-bin-widths
+
+# Define a function for calculating histogram bin widths Freedman-Diaconis rule
+# Bin Width = 2 * IQR / n^(1/3)
+
+fg_bin_width <- function(IQR, n) {
+  2 * IQR / n^(1/3)
+}
+
+# Calculate bin widths
+bin_width_mefl <- fg_bin_width(IQR(dipac25_bkd_trim$`mid-eye-fork-length`), 
+                                   length(dipac25_bkd_trim$`mid-eye-fork-length`))
+
+bin_width_avg_egg_mass <- fg_bin_width(IQR(dipac25_bkd_trim$avg_egg_mass_g), 
+                                   length(dipac25_bkd_trim$avg_egg_mass_g))
+
+bin_width_est_fecund <- fg_bin_width(IQR(dipac25_bkd_trim$est_fecund_n), 
+                                   length(dipac25_bkd_trim$est_fecund_n))
+
+bin_width_nmolT_g <- fg_bin_width(IQR(dipac25_bkd_trim$nmolT_g), 
+                                   length(dipac25_bkd_trim$nmolT_g))
+
+bin_width_nmolT_egg <- fg_bin_width(IQR(dipac25_bkd_trim$nmolT_egg), 
+                                   length(dipac25_bkd_trim$nmolT_egg))
+```
+
+```{r}
+#| label: build-histograms
+
+histo_mefl <- ggplot(data = dipac25_bkd_trim, aes(x = `mid-eye-fork-length`)) +
+  geom_histogram(binwidth = bin_width_mefl, fill = "#2CA02CFF", color = "black") +
+  geom_rug()
+
+histo_avg_egg_mass <- ggplot(data = dipac25_bkd_trim, aes(x = avg_egg_mass_g)) +
+  geom_histogram(binwidth = bin_width_avg_egg_mass, fill = "#2CA02CFF", color = "black") +
+  geom_rug()
+
+histo_est_fecund <- ggplot(data = dipac25_bkd_trim, aes(x = est_fecund_n)) +
+  geom_histogram(binwidth = bin_width_est_fecund, fill = "#2CA02CFF", color = "black") +
+  geom_rug()
+
+histo_nmolT_g <- ggplot(data = dipac25_bkd_trim, aes(x = nmolT_g)) +
+  geom_histogram(binwidth = bin_width_nmolT_g, fill = "#2CA02CFF", color = "black") +
+  geom_rug()
+
+histo_nmolT_egg <- ggplot(data = dipac25_bkd_trim, aes(x = nmolT_egg)) +
+  geom_histogram(binwidth = bin_width_nmolT_egg, fill = "#2CA02CFF", color = "black") +
+  geom_rug()
+```
+
+```{r}
+#| label: plot-histograms
+#| fig-cap: "Histograms for various fish and fish egg variables."
+
+histo_patchwork <- histo_mefl + histo_avg_egg_mass + histo_est_fecund +
+  histo_nmolT_g + histo_nmolT_egg + plot_layout(axes = "collect")
+
+histo_patchwork
+```
+Everything is looking pretty normally distributed.
+
+### Summary Statistics
+
+```{r}
+#| label: summary-stats-table
+
+long_dipac25_bkd_trim <- dipac25_bkd_trim |>
+  pivot_longer(
+    cols = c(
+      `mid-eye-fork-length`, avg_egg_mass_g, est_fecund_n, nmolT_g, nmolT_egg
+      ),
+    names_to = "variable_name",
+    values_to = "value"
+  )
+
+summary_table <- long_dipac25_bkd_trim |> 
+  group_by(variable_name) |> 
+  summarise(
+    mean = round(mean(value, na.rm = TRUE), 2),
+    sd = round(sd(value, na.rm = TRUE), 2),
+    min = round(min(value, na.rm = TRUE), 2),
+    max = round(max(value, na.rm = TRUE), 2),
+    median = round(median(value, na.rm = TRUE), 2)
+  )
+
+summary_table |>
+  kable(
+    caption = "Summary Statistics for Fish and Egg Variables",
+    col.names = c("Variable", "Mean", "Std. Dev.", "Min", "Max", "Median"),
+    digits = 2
+  )
+
+```
+
+### Exploring Egg Thiamine per Gram
+
+#### Quartiles
+
+```{r}
+#| label: egg-thia-conc-quartiles
+
+quantile(dipac25_bkd_trim$nmolT_g, probs = seq(0, 1, 0.25), na.rm = FALSE)
+
+```
+
+More than 25% of individuals eggs are deficient on a concentration basis.
+
+#### % Deficient
+
+```{r}
+
+#| label: egg-thia-conc-count
+
+dipac25_bkd_trim |> 
+  summarise(
+    n = n(),
+    deficient = sum(deficient_conc),
+    deficient_perc = (deficient / n) * 100
+  )  |> 
+  kable(
+    caption = "Egg Thiamine Concentration",
+    col.names = c("Individuals", "Number Deficient", "%Deficient"),
+    digits = 2
+  )
+
+```
+Of 58 fish, 16 are deficient (28%), what would it look like if we group the 16 
+lowest concentration fish for a deficient group, and the 16 highest concentration
+fish for a replete group?
+
+### Grouping Ideas
+
+#### Lowest 16, Highest 16
+
+##### Density Plots
+
+```{r}
+#| label: subset-low-high-group
+
+bottom_16 <- dipac25_bkd_trim |> 
+  arrange(desc(nmolT_g)) |> 
+  slice_tail(n = 16)
+
+top_16 <- dipac25_bkd_trim |> 
+  arrange(desc(nmolT_g)) |> 
+  slice_head(n = 16)
+
+top_bottom_16 <- rbind(bottom_16, top_16) |> 
+  mutate(group = factor(if_else(nmolT_g > 5.0, "replete", "deficient")))
+
+```
+
+```{r}
+#| label: low-high-density-dist
+#| message: false
+
+density_low_high_mefl <- ggplot(top_bottom_16, 
+                                aes(x = `mid-eye-fork-length`,
+                                    y = group,
+                                    fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_low_high_avg_egg_mass <- ggplot(top_bottom_16, aes(x = avg_egg_mass_g,
+                                                   y = group,
+                                                   fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_low_high_est_fecund <- ggplot(top_bottom_16, 
+                                      aes(
+                                        x = est_fecund_n,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_low_high_nmolT_g <- ggplot(top_bottom_16, 
+                                      aes(
+                                        x = nmolT_g,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_low_high_nmolT_egg <- ggplot(top_bottom_16, 
+                                      aes(
+                                        x = nmolT_egg,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+```
+
+```{r}
+#| label: low-high-combined-density-dist
+#| message: false
+
+patchwork_low_high_densities <- density_low_high_mefl +
+  density_low_high_avg_egg_mass +
+  density_low_high_est_fecund +
+  density_low_high_nmolT_g +
+  density_low_high_nmolT_egg +
+  plot_layout(axes = "collect")
+  
+patchwork_low_high_densities
+```
+
+##### Summary Stats
+
+```{r}
+#| label: low-high-summary-stats
+#| message: false
+
+long_top_bottom_16 <- top_bottom_16 |> 
+  select(fish_id, `mid-eye-fork-length`, avg_egg_mass_g, est_fecund_n, nmolT_g,
+         nmolT_egg, group) |> 
+    pivot_longer(
+    cols = c(
+      `mid-eye-fork-length`, avg_egg_mass_g, est_fecund_n, nmolT_g, nmolT_egg
+      ),
+    names_to = "variable_name",
+    values_to = "value"
+  )
+
+low_high_summary_table <- long_top_bottom_16 |> 
+  group_by(variable_name, group) |> 
+  summarise(
+    mean = round(mean(value, na.rm = TRUE), 2),
+    sd = round(sd(value, na.rm = TRUE), 2),
+    min = round(min(value, na.rm = TRUE), 2),
+    max = round(max(value, na.rm = TRUE), 2),
+    median = round(median(value, na.rm = TRUE), 2)
+  ) |>
+  kable(
+    caption = "Summary Statistics for Lowest/Highest 16 Egg T. Concs",
+    col.names = c("Variable", "Group" ," Mean", "Std. Dev.", "Min", "Max",
+                  "Median"),
+    digits = 2
+  )
+
+low_high_summary_table
+
+```
+
+```{r}
+#| label: low-high-gamete-est
+
+total_gametes_top_bot_16 <- scales::comma(sum(top_bottom_16$est_fecund_n))
+
+deficient_gametes_top_bot_16 <- top_bottom_16 |> 
+  filter(group == "deficient") |> 
+  summarise(total = sum(est_fecund_n)) |> 
+  pull(total) |> 
+  comma()
+
+replete_gametes_top_bot_16 <- top_bottom_16 |> 
+  filter(group == "replete") |> 
+  summarise(total = sum(est_fecund_n)) |> 
+  pull(total) |> 
+  comma()
+
+# Get deficent females
+bot_16_females <- top_bottom_16 |> 
+  filter(group == "deficient") |> 
+  pull(fish_id)
+
+formatted_deficient_id_list <- combine_words(bot_16_females)
+
+# Get replete females
+top_16_females <- top_bottom_16 |> 
+  filter(group == "replete") |> 
+  pull(fish_id)
+
+formatted_replete_id_list <- combine_words(top_16_females)
+
+```
+
+The total estimated number of gametes in this grouping is 
+`{r} total_gametes_top_bot_16`, including `{r} deficient_gametes_top_bot_16`
+deficient and `{r} replete_gametes_top_bot_16` replete gametes.
+
+The deficient females for this grouping are `{r} formatted_deficient_id_list`.
+
+The replete females for this grouping are `{r} formatted_replete_id_list`.

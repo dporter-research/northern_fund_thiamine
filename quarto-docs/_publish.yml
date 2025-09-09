@@ -1,0 +1,4 @@
+- source: 01-DIPAC2025-egg-thiamine.qmd
+  quarto-pub:
+    - id: f3670ad5-3277-42e2-913c-b7813cb2bfe0
+      url: 'https://dporter.quarto.pub/chinook-egg-thiamine-macaulay-2025'
