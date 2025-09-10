@@ -84,16 +84,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#glossary-of-variables" id="toc-glossary-of-variables" class="nav-link" data-scroll-target="#glossary-of-variables">Glossary of Variables</a></li>
   </ul></li>
   <li><a href="#analysis" id="toc-analysis" class="nav-link" data-scroll-target="#analysis">Analysis</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#histograms" id="toc-histograms" class="nav-link" data-scroll-target="#histograms">Histograms</a></li>
   <li><a href="#summary-statistics" id="toc-summary-statistics" class="nav-link" data-scroll-target="#summary-statistics">Summary Statistics</a></li>
-  <li><a href="#exploring-egg-thiamine-per-gram" id="toc-exploring-egg-thiamine-per-gram" class="nav-link" data-scroll-target="#exploring-egg-thiamine-per-gram">Exploring Egg Thiamine per Gram</a></li>
-  <li><a href="#grouping-ideas" id="toc-grouping-ideas" class="nav-link" data-scroll-target="#grouping-ideas">Grouping Ideas</a></li>
+  <li><a href="#exploring-egg-thiamine-per-gram" id="toc-exploring-egg-thiamine-per-gram" class="nav-link" data-scroll-target="#exploring-egg-thiamine-per-gram">Exploring Egg Thiamine per Gram</a>
+  <ul class="collapse">
+  <li><a href="#quartiles" id="toc-quartiles" class="nav-link" data-scroll-target="#quartiles">Quartiles</a></li>
+  <li><a href="#deficient" id="toc-deficient" class="nav-link" data-scroll-target="#deficient">% Deficient</a></li>
   </ul></li>
+  </ul></li>
+  <li><a href="#grouping-ideas" id="toc-grouping-ideas" class="nav-link" data-scroll-target="#grouping-ideas">Grouping Ideas</a>
+  <ul>
+  <li><a href="#lowest-16-highest-16" id="toc-lowest-16-highest-16" class="nav-link" data-scroll-target="#lowest-16-highest-16">Lowest 16, Highest 16</a>
+  <ul class="collapse">
+  <li><a href="#density-plots" id="toc-density-plots" class="nav-link" data-scroll-target="#density-plots">Density Plots</a></li>
+  <li><a href="#summary-stats" id="toc-summary-stats" class="nav-link" data-scroll-target="#summary-stats">Summary Stats</a></li>
+  </ul></li>
+  <li><a href="#split" id="toc-split" class="nav-link" data-scroll-target="#split">50/50 split</a>
+  <ul class="collapse">
+  <li><a href="#density-plots-1" id="toc-density-plots-1" class="nav-link" data-scroll-target="#density-plots-1">Density Plots</a></li>
+  <li><a href="#summary-stats-1" id="toc-summary-stats-1" class="nav-link" data-scroll-target="#summary-stats-1">Summary Stats</a></li>
+  </ul></li>
+  <li><a href="#nmol-tg-split" id="toc-nmol-tg-split" class="nav-link" data-scroll-target="#nmol-tg-split">5 nmol T/g split</a>
+  <ul class="collapse">
+  <li><a href="#density-plots-2" id="toc-density-plots-2" class="nav-link" data-scroll-target="#density-plots-2">Density Plots</a></li>
+  <li><a href="#summary-stats-2" id="toc-summary-stats-2" class="nav-link" data-scroll-target="#summary-stats-2">Summary Stats</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#linear-models" id="toc-linear-models" class="nav-link" data-scroll-target="#linear-models">Linear Models</a></li>
   </ul>
 </nav>
 </div>
@@ -119,7 +141,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 8, 2025</p>
+      <p class="date-modified">September 9, 2025</p>
     </div>
   </div>
     
@@ -155,11 +177,11 @@ The total mass of eggs, in grams, for each fish, measured at DIPAC after fertili
 </dd>
 <dt><code>est_pre_hardened_egg_mass_g</code></dt>
 <dd>
-The estimated total mass of eggs, in grams, for each fish. Calculated by reducing the total egg mass by 23%, which is the estimated increase in salmon egg weight after water hardening, fertilization is not expected to significantly increase egg weight (Fleming and Ng, 1987).
+The estimated total mass of eggs, in grams, for each fish. Calculated by reducing the total egg mass by 23%, which is the estimated increase in salmon egg weight after water hardening, fertilization is not expected to significantly increase egg weight (Fleming and Ng, 1987). I was using this to estimate fecundity before Arthur sent estimated egg counts, I am using his counts now.
 </dd>
 <dt><code>est_fecund_n</code></dt>
 <dd>
-The total estimated fecundity, representing the total number of eggs produced by each female. Calculated by dividing the estimated pre-hardening egg mass by the average egg mass.
+The total estimated fecundity, representing the total number of eggs produced by each female. Provided by Arthur Hamlett, DIPAC.
 </dd>
 <dt><code>nmolT_g</code></dt>
 <dd>
@@ -348,11 +370,11 @@ Nanomoles of thiamine per egg.
 </tr>
 <tr class="even">
 <td style="text-align: left;">est_fecund_n</td>
-<td style="text-align: right;">3693.06</td>
-<td style="text-align: right;">1165.87</td>
-<td style="text-align: right;">702.14</td>
-<td style="text-align: right;">6266.85</td>
-<td style="text-align: right;">3739.99</td>
+<td style="text-align: right;">4700.81</td>
+<td style="text-align: right;">1505.90</td>
+<td style="text-align: right;">907.00</td>
+<td style="text-align: right;">8243.00</td>
+<td style="text-align: right;">4758.50</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">mid-eye-fork-length</td>
@@ -441,12 +463,14 @@ Nanomoles of thiamine per egg.
 <p>Of 58 fish, 16 are deficient (28%), what would it look like if we group the 16 lowest concentration fish for a deficient group, and the 16 highest concentration fish for a replete group?</p>
 </section>
 </section>
-<section id="grouping-ideas" class="level3">
-<h3 class="anchored" data-anchor-id="grouping-ideas">Grouping Ideas</h3>
-<section id="lowest-16-highest-16" class="level4">
-<h4 class="anchored" data-anchor-id="lowest-16-highest-16">Lowest 16, Highest 16</h4>
-<section id="density-plots" class="level5">
-<h5 class="anchored" data-anchor-id="density-plots">Density Plots</h5>
+</section>
+<section id="grouping-ideas" class="level2">
+<h2 class="anchored" data-anchor-id="grouping-ideas">Grouping Ideas</h2>
+<section id="lowest-16-highest-16" class="level3">
+<h3 class="anchored" data-anchor-id="lowest-16-highest-16">Lowest 16, Highest 16</h3>
+<p>In this grouping, we would select all the thiamine deficient (&lt;5 nmol T/g) fish for the low group, and the 16 fish with the highest egg thiamine concentrations for the high group.</p>
+<section id="density-plots" class="level4">
+<h4 class="anchored" data-anchor-id="density-plots">Density Plots</h4>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -549,8 +573,8 @@ Nanomoles of thiamine per egg.
 </div>
 </div>
 </section>
-<section id="summary-stats" class="level5">
-<h5 class="anchored" data-anchor-id="summary-stats">Summary Stats</h5>
+<section id="summary-stats" class="level4">
+<h4 class="anchored" data-anchor-id="summary-stats">Summary Stats</h4>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -628,20 +652,20 @@ Nanomoles of thiamine per egg.
 <tr class="odd">
 <td style="text-align: left;">est_fecund_n</td>
 <td style="text-align: left;">deficient</td>
-<td style="text-align: right;">3656.42</td>
-<td style="text-align: right;">1151.89</td>
-<td style="text-align: right;">702.14</td>
-<td style="text-align: right;">5267.96</td>
-<td style="text-align: right;">3529.43</td>
+<td style="text-align: right;">4778.12</td>
+<td style="text-align: right;">1587.79</td>
+<td style="text-align: right;">907.00</td>
+<td style="text-align: right;">7819.00</td>
+<td style="text-align: right;">4894.00</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">est_fecund_n</td>
 <td style="text-align: left;">replete</td>
-<td style="text-align: right;">4123.52</td>
-<td style="text-align: right;">1174.23</td>
-<td style="text-align: right;">1257.14</td>
-<td style="text-align: right;">6266.85</td>
-<td style="text-align: right;">3938.17</td>
+<td style="text-align: right;">5232.81</td>
+<td style="text-align: right;">1461.99</td>
+<td style="text-align: right;">1892.00</td>
+<td style="text-align: right;">8243.00</td>
+<td style="text-align: right;">5125.50</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">mid-eye-fork-length</td>
@@ -704,41 +728,851 @@ Nanomoles of thiamine per egg.
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>total_gametes_top_bot_16 <span class="ot">&lt;-</span> scales<span class="sc">::</span><span class="fu">comma</span>(<span class="fu">sum</span>(top_bottom_16<span class="sc">$</span>est_fecund_n))</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>deficient_gametes_top_bot_16 <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"deficient"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>replete_gametes_top_bot_16 <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"replete"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Get deficent females</span></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>bot_16_females <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"deficient"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>deficient_gametes_top_bot_16 <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"deficient"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>replete_gametes_top_bot_16 <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"replete"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Get deficent females</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>bot_16_females <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"deficient"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>formatted_deficient_id_list <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(bot_16_females)</span>
 <span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>formatted_deficient_id_list <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(bot_16_females)</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Get replete females</span></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>top_16_females <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"replete"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Get replete females</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>top_16_females <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"replete"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>formatted_replete_id_list <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(top_16_females)</span>
 <span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>formatted_replete_id_list <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(top_16_females)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate fish in each group and proportional gametes</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>top_bottom_16_total_n <span class="ot">&lt;-</span> <span class="fu">length</span>(top_bottom_16<span class="sc">$</span>fish_id)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>top_bot_16_deficient_n <span class="ot">&lt;-</span> top_bottom_16 <span class="sc">|&gt;</span> </span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"deficient"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>top_bot_16_replete_n <span class="ot">&lt;-</span> top_bottom_16_total_n <span class="sc">-</span> top_bot_16_deficient_n </span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Gametes</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="do">## Even Split</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>top_bot_16_even_split_gametes <span class="ot">&lt;-</span> <span class="dv">90000</span> <span class="sc">/</span> <span class="dv">2</span> </span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>top_bot_16_even_split_gametes_per_fish_deficient <span class="ot">&lt;-</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(top_bot_16_even_split_gametes <span class="sc">/</span> top_bot_16_deficient_n, <span class="dv">0</span>)</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>top_bot_16_even_split_gametes_per_fish_replete <span class="ot">&lt;-</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(top_bot_16_even_split_gametes <span class="sc">/</span> top_bot_16_replete_n, <span class="dv">0</span>)</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="do">### Is it even possible to get that many gametes from the deficient group?</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>top_bot_16_even_split_gametes_per_fish_deficient <span class="sc">&lt;=</span> bottom_16<span class="sc">$</span>est_fecund_n</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 fish comes up short, which fish?</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>top_bot_16_short_deficient_fish <span class="ot">&lt;-</span> bottom_16 <span class="sc">|&gt;</span> </span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(top_bot_16_even_split_gametes_per_fish_deficient <span class="sc">&gt;</span> est_fecund_n)</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>fmt_top_bot_16_short_deficient_fish  <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>  top_bot_16_short_deficient_fish<span class="sc">$</span>fish_id)</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>fmt_top_bot_16_short_deficient_fish_gametes <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(<span class="fu">comma</span>(<span class="fu">round</span>(</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>  top_bot_16_short_deficient_fish<span class="sc">$</span>est_fecund_n, <span class="dv">0</span>)))</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Is it possible for replete fish?</span></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>top_bot_16_even_split_gametes_per_fish_replete <span class="sc">&lt;=</span> top_16<span class="sc">$</span>est_fecund_n</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 fish comes up short, which fish?</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>top_bot_16_short_replete_fish <span class="ot">&lt;-</span> top_16 <span class="sc">|&gt;</span> </span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(top_bot_16_even_split_gametes_per_fish_deficient <span class="sc">&gt;</span> est_fecund_n)</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>fmt_top_bot_16_short_replete_fish  <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>  top_bot_16_short_replete_fish<span class="sc">$</span>fish_id)</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>fmt_top_bot_16_short_replete_fish_gametes <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(<span class="fu">comma</span>(<span class="fu">round</span>(</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>  top_bot_16_short_replete_fish<span class="sc">$</span>est_fecund_n, <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>The total estimated number of gametes in this grouping is 124,479, including 58,503 deficient and 65,976 replete gametes.</p>
+<p>This group would contain 16 fish in the deficient group and 16 fish in the replete group. If gametes were split evenly per group and per fish that would be 45,000 gametes per group and 2,812 gametes per fish.</p>
+<p>Of the deficient fish, f05 comes up short with 907 estimated gametes.</p>
+<p>Of the replete fish, f04 comes up short with 1,892 estimated gametes.</p>
 <p>The deficient females for this grouping are f54, f49, f05, f14, f23, f53, f10, f30, f51, f52, f17, f40, f60, f02, f35, and f20.</p>
 <p>The replete females for this grouping are f37, f46, f43, f32, f31, f24, f27, f45, f04, f44, f57, f26, f42, f21, f50, and f58.</p>
 </section>
 </section>
+<section id="split" class="level3">
+<h3 class="anchored" data-anchor-id="split">50/50 split</h3>
+<p>In this grouping, we would keep all 58 fish in the study and divide the low and high groups down the middle of egg thiamine concentrations (6.23 nmol T/g).</p>
+<section id="density-plots-1" class="level4">
+<h4 class="anchored" data-anchor-id="density-plots-1">Density Plots</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fifty_fifty <span class="ot">&lt;-</span> dipac25_bkd_trim <span class="sc">|&gt;</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">if_else</span>(nmolT_g <span class="sc">&gt;=</span> <span class="fu">median</span>(nmolT_g), <span class="st">"high"</span>, <span class="st">"low"</span>),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"low"</span>, <span class="st">"high"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>density_fifty_fifty_mefl <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fifty_fifty, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">mid-eye-fork-length</span><span class="st">`</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">y =</span> group,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>density_fifty_fifty_avg_egg_mass <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fifty_fifty, <span class="fu">aes</span>(<span class="at">x =</span> avg_egg_mass_g,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>                                                   <span class="at">y =</span> group,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                                                   <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>density_fifty_fifty_est_fecund <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fifty_fifty, </span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">aes</span>(</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">x =</span> est_fecund_n,</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">y =</span> group,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>density_fifty_fifty_nmolT_g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fifty_fifty, </span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">aes</span>(</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">x =</span> nmolT_g,</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">y =</span> group,</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>density_fifty_fifty_nmolT_egg <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fifty_fifty, </span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">aes</span>(</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">x =</span> nmolT_egg,</span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">y =</span> group,</span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>patchwork_fifty_fifty_densities <span class="ot">&lt;-</span> density_fifty_fifty_mefl <span class="sc">+</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  density_fifty_fifty_avg_egg_mass <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  density_fifty_fifty_est_fecund <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  density_fifty_fifty_nmolT_g <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  density_fifty_fifty_nmolT_egg <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">axes =</span> <span class="st">"collect"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>patchwork_fifty_fifty_densities</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="01-DIPAC2025-egg-thiamine_files/figure-html/fifty-fifty-combined-density-dist-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="01-DIPAC2025-egg-thiamine_files/figure-html/fifty-fifty-combined-density-dist-1.png" class="img-fluid figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
+<section id="summary-stats-1" class="level4">
+<h4 class="anchored" data-anchor-id="summary-stats-1">Summary Stats</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fifty_fifty_long <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(fish_id, <span class="st">`</span><span class="at">mid-eye-fork-length</span><span class="st">`</span>, avg_egg_mass_g, est_fecund_n, nmolT_g,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>         nmolT_egg, group) <span class="sc">|&gt;</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">c</span>(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">mid-eye-fork-length</span><span class="st">`</span>, avg_egg_mass_g, est_fecund_n, nmolT_g, nmolT_egg</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"variable_name"</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  )    </span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>fifty_fifty_summary_table <span class="ot">&lt;-</span> fifty_fifty_long <span class="sc">|&gt;</span> </span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(variable_name, group) <span class="sc">|&gt;</span> </span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">round</span>(<span class="fu">mean</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">round</span>(<span class="fu">sd</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="fu">round</span>(<span class="fu">min</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">max =</span> <span class="fu">round</span>(<span class="fu">max</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">round</span>(<span class="fu">median</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Summary Statistics for 50/50 Split Grouping"</span>,</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Variable"</span>, <span class="st">"Group"</span>, <span class="st">"N"</span>, <span class="st">" Mean"</span>, <span class="st">"Std. Dev."</span>, <span class="st">"Min"</span>, <span class="st">"Max"</span>,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Median"</span>),</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="dv">2</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>fifty_fifty_summary_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Summary Statistics for 50/50 Split Grouping</caption>
+<colgroup>
+<col style="width: 28%">
+<col style="width: 8%">
+<col style="width: 4%">
+<col style="width: 11%">
+<col style="width: 14%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Group</th>
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Std. Dev.</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Max</th>
+<th style="text-align: right;">Median</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">avg_egg_mass_g</td>
+<td style="text-align: left;">low</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.26</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">avg_egg_mass_g</td>
+<td style="text-align: left;">high</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">est_fecund_n</td>
+<td style="text-align: left;">low</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">4637.31</td>
+<td style="text-align: right;">1487.90</td>
+<td style="text-align: right;">907.00</td>
+<td style="text-align: right;">7819.00</td>
+<td style="text-align: right;">4710.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">est_fecund_n</td>
+<td style="text-align: left;">high</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">4764.31</td>
+<td style="text-align: right;">1547.33</td>
+<td style="text-align: right;">1737.00</td>
+<td style="text-align: right;">8243.00</td>
+<td style="text-align: right;">4807.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mid-eye-fork-length</td>
+<td style="text-align: left;">low</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">716.00</td>
+<td style="text-align: right;">44.41</td>
+<td style="text-align: right;">616.00</td>
+<td style="text-align: right;">802.00</td>
+<td style="text-align: right;">711.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mid-eye-fork-length</td>
+<td style="text-align: left;">high</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">712.28</td>
+<td style="text-align: right;">50.26</td>
+<td style="text-align: right;">606.00</td>
+<td style="text-align: right;">825.00</td>
+<td style="text-align: right;">704.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">nmolT_egg</td>
+<td style="text-align: left;">low</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">1.26</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">0.61</td>
+<td style="text-align: right;">1.88</td>
+<td style="text-align: right;">1.28</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nmolT_egg</td>
+<td style="text-align: left;">high</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">1.92</td>
+<td style="text-align: right;">0.41</td>
+<td style="text-align: right;">1.30</td>
+<td style="text-align: right;">3.11</td>
+<td style="text-align: right;">1.90</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">nmolT_g</td>
+<td style="text-align: left;">low</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">4.80</td>
+<td style="text-align: right;">1.01</td>
+<td style="text-align: right;">2.08</td>
+<td style="text-align: right;">6.18</td>
+<td style="text-align: right;">4.72</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nmolT_g</td>
+<td style="text-align: left;">high</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">7.68</td>
+<td style="text-align: right;">1.13</td>
+<td style="text-align: right;">6.28</td>
+<td style="text-align: right;">10.84</td>
+<td style="text-align: right;">7.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>total_gametes_fifty_fifty <span class="ot">&lt;-</span> scales<span class="sc">::</span><span class="fu">comma</span>(<span class="fu">sum</span>(fifty_fifty<span class="sc">$</span>est_fecund_n))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"low"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low_deficient_gametes <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"low"</span> <span class="sc">&amp;</span> deficient_conc) <span class="sc">|&gt;</span> </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low_replete_gametes <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"low"</span> <span class="sc">&amp;</span> <span class="sc">!</span>deficient_conc) <span class="sc">|&gt;</span> </span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>fifty_fifty_high_replete_gametes <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"high"</span> <span class="sc">&amp;</span> <span class="sc">!</span>deficient_conc) <span class="sc">|&gt;</span> </span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Get deficent females low group</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low_deficient <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"low"</span> <span class="sc">&amp;</span> deficient_conc)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low_deficient_females <span class="ot">&lt;-</span> fifty_fifty_low_deficient <span class="sc">|&gt;</span> </span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>fmt_fifty_fifty_low_deficient_ids <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(fifty_fifty_low_deficient_females)</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Get replete females low group</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low_replete <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"low"</span> <span class="sc">&amp;</span> <span class="sc">!</span>deficient_conc)</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low_replete_females <span class="ot">&lt;-</span> fifty_fifty_low_replete <span class="sc">|&gt;</span> </span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>fmt_fifty_fifty_low_replete_ids <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(fifty_fifty_low_replete_females)</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Get replete females high group</span></span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>fifty_fifty_high_replete <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"high"</span> <span class="sc">&amp;</span> <span class="sc">!</span>deficient_conc) </span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>fifty_fifty_high_replete_females <span class="ot">&lt;-</span> fifty_fifty_high_replete <span class="sc">|&gt;</span> </span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>fmt_fifty_fifty_high_replete_ids <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(fifty_fifty_high_replete_females)</span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate fish in each group and proportional gametes</span></span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>fifty_fifty_total_n <span class="ot">&lt;-</span> <span class="fu">length</span>(fifty_fifty<span class="sc">$</span>fish_id)</span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>fifty_fifty_low_n <span class="ot">&lt;-</span> fifty_fifty <span class="sc">|&gt;</span> </span>
+<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"low"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>fifty_fifty_high_n <span class="ot">&lt;-</span> fifty_fifty_total_n <span class="sc">-</span> fifty_fifty_low_n</span>
+<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Gametes</span></span>
+<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a><span class="do">## Even Split</span></span>
+<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>fifty_fifty_even_split_gametes <span class="ot">&lt;-</span> <span class="dv">90000</span> <span class="sc">/</span> <span class="dv">2</span> </span>
+<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>fifty_fifty_even_split_gametes_per_fish_low <span class="ot">&lt;-</span></span>
+<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(fifty_fifty_even_split_gametes <span class="sc">/</span> fifty_fifty_low_n, <span class="dv">0</span>)</span>
+<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a>fifty_fifty_even_split_gametes_per_fish_high <span class="ot">&lt;-</span> </span>
+<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(fifty_fifty_even_split_gametes <span class="sc">/</span> fifty_fifty_high_n, <span class="dv">0</span>)</span>
+<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a><span class="do">### Is it even possible to get that many gametes from the deficient group?</span></span>
+<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a>fifty_fifty_even_split_gametes_per_fish_low <span class="sc">&lt;=</span> fifty_fifty_low<span class="sc">$</span>est_fecund_n</span>
+<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 fish comes up short, which fish?</span></span>
+<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a>fifty_fifty_short_low_fish <span class="ot">&lt;-</span> fifty_fifty_low <span class="sc">|&gt;</span> </span>
+<span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(fifty_fifty_even_split_gametes_per_fish_low <span class="sc">&gt;</span> est_fecund_n)</span>
+<span id="cb19-79"><a href="#cb19-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-80"><a href="#cb19-80" aria-hidden="true" tabindex="-1"></a>fmt_fifty_fifty_short_low_fish <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(</span>
+<span id="cb19-81"><a href="#cb19-81" aria-hidden="true" tabindex="-1"></a>  fifty_fifty_short_low_fish<span class="sc">$</span>fish_id)</span>
+<span id="cb19-82"><a href="#cb19-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-83"><a href="#cb19-83" aria-hidden="true" tabindex="-1"></a>fmt_fifty_fifty_short_low_fish_gametes <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(<span class="fu">comma</span>(<span class="fu">round</span>(</span>
+<span id="cb19-84"><a href="#cb19-84" aria-hidden="true" tabindex="-1"></a>  fifty_fifty_short_low_fish<span class="sc">$</span>est_fecund_n, <span class="dv">0</span>)))</span>
+<span id="cb19-85"><a href="#cb19-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-86"><a href="#cb19-86" aria-hidden="true" tabindex="-1"></a><span class="co"># Is it possible for replete fish?</span></span>
+<span id="cb19-87"><a href="#cb19-87" aria-hidden="true" tabindex="-1"></a>fifty_fifty_even_split_gametes_per_fish_high <span class="sc">&lt;=</span> fifty_fifty_high_replete<span class="sc">$</span>est_fecund_n</span>
+<span id="cb19-88"><a href="#cb19-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-89"><a href="#cb19-89" aria-hidden="true" tabindex="-1"></a><span class="co"># All replete fish have enough gametes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>This grouping would contain 29 fish in the “low” group; of those fish 16 would be considered “deficient” in egg thiamine concentration, 13 would be considered “replete”. The “high” group would contain 29 “replete” fish.</p>
+<p>Our 90,000 fish allowance would include 45,000 “low” and 45,000 “high” gametes if we split the groups evenly, this works out to 1,552 gametes per fish.</p>
+<p>Of the low group, fish f05 does not have enough estimated gametes (907). All of the high group fish have enough estimated gametes.</p>
+<p>The deficient females in the “low” group for this grouping are f02, f05, f10, f14, f17, f20, f23, f30, f35, f40, f49, f51, f52, f53, f54, and f60. The replete females in the “low” group for this grouping are f01, f03, f06, f08, f12, f15, f16, f28, f29, f33, f36, f39, and f59.</p>
+<p>The replete females in the “high” group for this grouping are f04, f07, f09, f11, f18, f19, f21, f22, f24, f25, f26, f27, f31, f32, f37, f38, f41, f42, f43, f44, f45, f46, f47, f48, f50, f55, f56, f57, and f58.</p>
+</section>
+</section>
+<section id="nmol-tg-split" class="level3">
+<h3 class="anchored" data-anchor-id="nmol-tg-split">5 nmol T/g split</h3>
+<p>In this grouping, we would keep all 58 fish in the study and divide the deficient and replete groups at the 5 nmol T/g benchmark. This would result in an uneven split.</p>
+<section id="density-plots-2" class="level4">
+<h4 class="anchored" data-anchor-id="density-plots-2">Density Plots</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>five_nmol <span class="ot">&lt;-</span> dipac25_bkd_trim <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">if_else</span>(nmolT_g <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="st">"replete"</span>, <span class="st">"deficient"</span>),</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"deficient"</span>, <span class="st">"replete"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>density_five_nmol_mefl <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(five_nmol, </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">mid-eye-fork-length</span><span class="st">`</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">y =</span> group,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>density_five_nmol_avg_egg_mass <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(five_nmol, <span class="fu">aes</span>(<span class="at">x =</span> avg_egg_mass_g,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>                                                   <span class="at">y =</span> group,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>                                                   <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>density_five_nmol_est_fecund <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(five_nmol, </span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">aes</span>(</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">x =</span> est_fecund_n,</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">y =</span> group,</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>density_five_nmol_nmolT_g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(five_nmol, </span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">aes</span>(</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">x =</span> nmolT_g,</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">y =</span> group,</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>density_five_nmol_nmolT_egg <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(five_nmol, </span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">aes</span>(</span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">x =</span> nmolT_egg,</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">y =</span> group,</span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">jittered_points =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"raincloud"</span>,</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.75</span></span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> my_palette)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>patchwork_five_nmol_densities <span class="ot">&lt;-</span> density_five_nmol_mefl <span class="sc">+</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  density_five_nmol_avg_egg_mass <span class="sc">+</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  density_five_nmol_est_fecund <span class="sc">+</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  density_five_nmol_nmolT_g <span class="sc">+</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  density_five_nmol_nmolT_egg <span class="sc">+</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">axes =</span> <span class="st">"collect"</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>patchwork_five_nmol_densities</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="01-DIPAC2025-egg-thiamine_files/figure-html/five-nmol-combined-density-dist-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="01-DIPAC2025-egg-thiamine_files/figure-html/five-nmol-combined-density-dist-1.png" class="img-fluid figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="summary-stats-2" class="level4">
+<h4 class="anchored" data-anchor-id="summary-stats-2">Summary Stats</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>five_nmol_long <span class="ot">&lt;-</span> five_nmol <span class="sc">|&gt;</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(fish_id, <span class="st">`</span><span class="at">mid-eye-fork-length</span><span class="st">`</span>, avg_egg_mass_g, est_fecund_n, nmolT_g,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>         nmolT_egg, group) <span class="sc">|&gt;</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">c</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">mid-eye-fork-length</span><span class="st">`</span>, avg_egg_mass_g, est_fecund_n, nmolT_g, nmolT_egg</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"variable_name"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  )    </span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>five_nmol_summary_table <span class="ot">&lt;-</span> five_nmol_long <span class="sc">|&gt;</span> </span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(variable_name, group) <span class="sc">|&gt;</span> </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">round</span>(<span class="fu">mean</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">round</span>(<span class="fu">sd</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="fu">round</span>(<span class="fu">min</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">max =</span> <span class="fu">round</span>(<span class="fu">max</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">round</span>(<span class="fu">median</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Summary Statistics for 5 nmol T/g Split Grouping"</span>,</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Variable"</span>, <span class="st">"Group"</span>, <span class="st">"N"</span>, <span class="st">" Mean"</span>, <span class="st">"Std. Dev."</span>, <span class="st">"Min"</span>, <span class="st">"Max"</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Median"</span>),</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="dv">2</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>five_nmol_summary_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Summary Statistics for 5 nmol T/g Split Grouping</caption>
+<colgroup>
+<col style="width: 26%">
+<col style="width: 13%">
+<col style="width: 4%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Group</th>
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Std. Dev.</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Max</th>
+<th style="text-align: right;">Median</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">avg_egg_mass_g</td>
+<td style="text-align: left;">deficient</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0.26</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">avg_egg_mass_g</td>
+<td style="text-align: left;">replete</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">est_fecund_n</td>
+<td style="text-align: left;">deficient</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">4778.12</td>
+<td style="text-align: right;">1587.79</td>
+<td style="text-align: right;">907.00</td>
+<td style="text-align: right;">7819.00</td>
+<td style="text-align: right;">4894.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">est_fecund_n</td>
+<td style="text-align: left;">replete</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">4671.36</td>
+<td style="text-align: right;">1492.36</td>
+<td style="text-align: right;">1737.00</td>
+<td style="text-align: right;">8243.00</td>
+<td style="text-align: right;">4604.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mid-eye-fork-length</td>
+<td style="text-align: left;">deficient</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">723.56</td>
+<td style="text-align: right;">37.48</td>
+<td style="text-align: right;">651.00</td>
+<td style="text-align: right;">792.00</td>
+<td style="text-align: right;">723.50</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mid-eye-fork-length</td>
+<td style="text-align: left;">replete</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">710.55</td>
+<td style="text-align: right;">50.15</td>
+<td style="text-align: right;">606.00</td>
+<td style="text-align: right;">825.00</td>
+<td style="text-align: right;">704.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">nmolT_egg</td>
+<td style="text-align: left;">deficient</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">1.05</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">0.61</td>
+<td style="text-align: right;">1.28</td>
+<td style="text-align: right;">1.08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nmolT_egg</td>
+<td style="text-align: left;">replete</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">1.79</td>
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">1.30</td>
+<td style="text-align: right;">3.11</td>
+<td style="text-align: right;">1.71</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">nmolT_g</td>
+<td style="text-align: left;">deficient</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">4.04</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">2.08</td>
+<td style="text-align: right;">4.88</td>
+<td style="text-align: right;">4.15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nmolT_g</td>
+<td style="text-align: left;">replete</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">7.08</td>
+<td style="text-align: right;">1.31</td>
+<td style="text-align: right;">5.09</td>
+<td style="text-align: right;">10.84</td>
+<td style="text-align: right;">6.86</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>total_gametes_five_nmol <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">sum</span>(five_nmol<span class="sc">$</span>est_fecund_n), <span class="dv">0</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>five_nmol_deficient_gametes <span class="ot">&lt;-</span> five_nmol <span class="sc">|&gt;</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"deficient"</span> <span class="sc">&amp;</span> deficient_conc) <span class="sc">|&gt;</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>five_nmol_replete_gametes <span class="ot">&lt;-</span> five_nmol <span class="sc">|&gt;</span> </span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"replete"</span> <span class="sc">&amp;</span> <span class="sc">!</span>deficient_conc) <span class="sc">|&gt;</span> </span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total =</span> <span class="fu">sum</span>(est_fecund_n)) <span class="sc">|&gt;</span> </span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(total) <span class="sc">|&gt;</span> </span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comma</span>()</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Get deficent females </span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>five_nmol_deficient <span class="ot">&lt;-</span> five_nmol <span class="sc">|&gt;</span> </span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"deficient"</span> <span class="sc">&amp;</span> deficient_conc)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>five_nmol_deficient_females <span class="ot">&lt;-</span> five_nmol_deficient <span class="sc">|&gt;</span> </span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>fmt_five_nmol_deficient_ids <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(five_nmol_deficient_females)</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Get replete females group</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>five_nmol_replete <span class="ot">&lt;-</span> five_nmol <span class="sc">|&gt;</span> </span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(group <span class="sc">==</span> <span class="st">"replete"</span> <span class="sc">&amp;</span> <span class="sc">!</span>deficient_conc) </span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>five_nmol_replete_females <span class="ot">&lt;-</span> five_nmol_replete <span class="sc">|&gt;</span> </span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fish_id)</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>fmt_five_nmol_replete_ids <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(five_nmol_replete_females)</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate fish in each group and proportional gametes</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>five_nmol_total_n <span class="ot">&lt;-</span> <span class="fu">length</span>(five_nmol<span class="sc">$</span>fish_id)</span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>five_nmol_deficient_n <span class="ot">&lt;-</span> <span class="fu">length</span>(five_nmol_deficient<span class="sc">$</span>fish_id)</span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>five_nmol_replete_n <span class="ot">&lt;-</span> <span class="fu">length</span>(five_nmol_replete<span class="sc">$</span>fish_id)</span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>five_nmol_deficient_prop <span class="ot">&lt;-</span> five_nmol_deficient_n <span class="sc">/</span> five_nmol_total_n</span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>five_nmol_replete_prop <span class="ot">&lt;-</span> five_nmol_replete_n <span class="sc">/</span> five_nmol_total_n</span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Gametes</span></span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a><span class="do">## Even Split</span></span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a>five_nmol_even_split_gametes <span class="ot">&lt;-</span> <span class="dv">90000</span> <span class="sc">/</span> <span class="dv">2</span> </span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a>five_nmol_even_split_gametes_per_fish_deficient <span class="ot">&lt;-</span></span>
+<span id="cb24-50"><a href="#cb24-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(five_nmol_even_split_gametes <span class="sc">/</span> five_nmol_deficient_n, <span class="dv">0</span>)</span>
+<span id="cb24-51"><a href="#cb24-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-52"><a href="#cb24-52" aria-hidden="true" tabindex="-1"></a>five_nmol_even_split_gametes_per_fish_replete <span class="ot">&lt;-</span> </span>
+<span id="cb24-53"><a href="#cb24-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(five_nmol_even_split_gametes <span class="sc">/</span> five_nmol_replete_n, <span class="dv">0</span>)</span>
+<span id="cb24-54"><a href="#cb24-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-55"><a href="#cb24-55" aria-hidden="true" tabindex="-1"></a><span class="do">### Is it even possible to get that many gametes from the deficient group?</span></span>
+<span id="cb24-56"><a href="#cb24-56" aria-hidden="true" tabindex="-1"></a>five_nmol_even_split_gametes_per_fish_deficient <span class="sc">&lt;=</span> five_nmol_deficient<span class="sc">$</span>est_fecund_n</span>
+<span id="cb24-57"><a href="#cb24-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-58"><a href="#cb24-58" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 fish comes up short, which fish?</span></span>
+<span id="cb24-59"><a href="#cb24-59" aria-hidden="true" tabindex="-1"></a>five_nmol_short_deficient_fish <span class="ot">&lt;-</span> five_nmol_deficient <span class="sc">|&gt;</span> </span>
+<span id="cb24-60"><a href="#cb24-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(five_nmol_even_split_gametes_per_fish_deficient <span class="sc">&gt;</span> est_fecund_n)</span>
+<span id="cb24-61"><a href="#cb24-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-62"><a href="#cb24-62" aria-hidden="true" tabindex="-1"></a>fmt_five_nmol_short_deficient_fish <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(</span>
+<span id="cb24-63"><a href="#cb24-63" aria-hidden="true" tabindex="-1"></a>  five_nmol_short_deficient_fish<span class="sc">$</span>fish_id)</span>
+<span id="cb24-64"><a href="#cb24-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-65"><a href="#cb24-65" aria-hidden="true" tabindex="-1"></a>fmt_five_nmol_short_deficient_fish_gametes <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(<span class="fu">comma</span>(<span class="fu">round</span>(</span>
+<span id="cb24-66"><a href="#cb24-66" aria-hidden="true" tabindex="-1"></a>  five_nmol_short_deficient_fish<span class="sc">$</span>est_fecund_n, <span class="dv">0</span>)))</span>
+<span id="cb24-67"><a href="#cb24-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-68"><a href="#cb24-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Is it possible for replete fish?</span></span>
+<span id="cb24-69"><a href="#cb24-69" aria-hidden="true" tabindex="-1"></a>five_nmol_even_split_gametes_per_fish_replete <span class="sc">&lt;=</span> five_nmol_replete<span class="sc">$</span>est_fecund_n</span>
+<span id="cb24-70"><a href="#cb24-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-71"><a href="#cb24-71" aria-hidden="true" tabindex="-1"></a><span class="do">## Proportional split</span></span>
+<span id="cb24-72"><a href="#cb24-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-73"><a href="#cb24-73" aria-hidden="true" tabindex="-1"></a>five_nmol_prop_split_gametes_deficient <span class="ot">&lt;-</span> </span>
+<span id="cb24-74"><a href="#cb24-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(five_nmol_deficient_prop <span class="sc">*</span> <span class="dv">90000</span>, <span class="dv">0</span>) </span>
+<span id="cb24-75"><a href="#cb24-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-76"><a href="#cb24-76" aria-hidden="true" tabindex="-1"></a>five_nmol_prop_split_gametes_per_fish_deficient <span class="ot">&lt;-</span> </span>
+<span id="cb24-77"><a href="#cb24-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(five_nmol_prop_split_gametes_deficient <span class="sc">/</span> five_nmol_deficient_n, <span class="dv">0</span>) </span>
+<span id="cb24-78"><a href="#cb24-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-79"><a href="#cb24-79" aria-hidden="true" tabindex="-1"></a>five_nmol_prop_split_gametes_replete <span class="ot">&lt;-</span> </span>
+<span id="cb24-80"><a href="#cb24-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(five_nmol_replete_prop <span class="sc">*</span> <span class="dv">90000</span>, <span class="dv">0</span>) </span>
+<span id="cb24-81"><a href="#cb24-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-82"><a href="#cb24-82" aria-hidden="true" tabindex="-1"></a>five_nmol_prop_split_gametes_per_fish_replete <span class="ot">&lt;-</span> </span>
+<span id="cb24-83"><a href="#cb24-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(five_nmol_prop_split_gametes_replete <span class="sc">/</span> five_nmol_replete_n, <span class="dv">0</span>) </span>
+<span id="cb24-84"><a href="#cb24-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-85"><a href="#cb24-85" aria-hidden="true" tabindex="-1"></a><span class="co"># Is this possible for deficient fish?</span></span>
+<span id="cb24-86"><a href="#cb24-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-87"><a href="#cb24-87" aria-hidden="true" tabindex="-1"></a>five_nmol_prop_split_gametes_per_fish_deficient <span class="sc">&lt;=</span> five_nmol_deficient<span class="sc">$</span>est_fecund_n</span>
+<span id="cb24-88"><a href="#cb24-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-89"><a href="#cb24-89" aria-hidden="true" tabindex="-1"></a><span class="co"># 1 fish come up short, which fish?</span></span>
+<span id="cb24-90"><a href="#cb24-90" aria-hidden="true" tabindex="-1"></a>five_nmol_short_prop_deficient_fish <span class="ot">&lt;-</span> five_nmol_deficient <span class="sc">|&gt;</span> </span>
+<span id="cb24-91"><a href="#cb24-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(five_nmol_prop_split_gametes_per_fish_deficient <span class="sc">&gt;</span> est_fecund_n)</span>
+<span id="cb24-92"><a href="#cb24-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-93"><a href="#cb24-93" aria-hidden="true" tabindex="-1"></a>fmt_five_nmol_short_prop_deficient_fish <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(</span>
+<span id="cb24-94"><a href="#cb24-94" aria-hidden="true" tabindex="-1"></a>  five_nmol_short_prop_deficient_fish<span class="sc">$</span>fish_id)</span>
+<span id="cb24-95"><a href="#cb24-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-96"><a href="#cb24-96" aria-hidden="true" tabindex="-1"></a>fmt_five_nmol_short_prop_deficient_fish_gametes <span class="ot">&lt;-</span> <span class="fu">combine_words</span>(<span class="fu">comma</span>(<span class="fu">round</span>(</span>
+<span id="cb24-97"><a href="#cb24-97" aria-hidden="true" tabindex="-1"></a>  five_nmol_short_prop_deficient_fish<span class="sc">$</span>est_fecund_n, <span class="dv">0</span>)))</span>
+<span id="cb24-98"><a href="#cb24-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-99"><a href="#cb24-99" aria-hidden="true" tabindex="-1"></a><span class="co"># Possible for replete group? </span></span>
+<span id="cb24-100"><a href="#cb24-100" aria-hidden="true" tabindex="-1"></a>five_nmol_prop_split_gametes_per_fish_replete <span class="sc">&lt;=</span> </span>
+<span id="cb24-101"><a href="#cb24-101" aria-hidden="true" tabindex="-1"></a>  five_nmol_replete<span class="sc">$</span>est_fecund_n</span>
+<span id="cb24-102"><a href="#cb24-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-103"><a href="#cb24-103" aria-hidden="true" tabindex="-1"></a><span class="co"># All replete fish have enough gametes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>This grouping would contain 16 fish in the “deficient” group and 42 fish in the “replete” group. Proportionately that is 27.6% deficient fish and 72.4% replete fish.</p>
+<p>If we wanted to have an even number of gametes per group (i.e., 45,000 gametes), it would require 2,812 gametes per deficient fish and 1,071 gametes per replete fish. One deficient fish (f05) is short of this many estimated gametes (907). This shortage could be covered by other deficient fish. All of the replete fish have enough gametes for this split.</p>
+<p>If we wanted to have a proportional number of gametes for each group (i.e., 24,828 gametes for the deficient group and 65,172 gametes for the replete group), it would require 1,552 per fish for each group. Again, fish f05 from the deficient group comes up short (only 907 estimated gametes). This shortage could be covered by other deficient females. For the replete group, all fish have enough estimated gametes.</p>
+<p>The deficient females in this grouping are: f02, f05, f10, f14, f17, f20, f23, f30, f35, f40, f49, f51, f52, f53, f54, and f60.</p>
+<p>The replete females in this grouping are: f01, f03, f04, f06, f07, f08, f09, f11, f12, f15, f16, f18, f19, f21, f22, f24, f25, f26, f27, f28, f29, f31, f32, f33, f36, f37, f38, f39, f41, f42, f43, f44, f45, f46, f47, f48, f50, f55, f56, f57, f58, and f59.</p>
+</section>
+</section>
+</section>
+<section id="linear-models" class="level2">
+<h2 class="anchored" data-anchor-id="linear-models">Linear Models</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> dipac25_bkd_trim, <span class="fu">aes</span>(<span class="at">x =</span> nmolT_g, <span class="at">y =</span> total_egg_mass_g)) <span class="sc">+</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_poly_line</span>() <span class="sc">+</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_poly_eq</span>(<span class="fu">use_label</span>(<span class="fu">c</span>(<span class="st">"eq"</span>, <span class="st">"r2"</span>, <span class="st">"p"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="01-DIPAC2025-egg-thiamine_files/figure-html/total-egg-mass-vs-conc-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="01-DIPAC2025-egg-thiamine_files/figure-html/total-egg-mass-vs-conc-1.png" class="img-fluid figure-img" width="672"></a></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 
 </main>
@@ -1164,7 +1998,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","selector":".lightbox","loop":false,"descPosition":"bottom","openEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","descPosition":"bottom","loop":false,"selector":".lightbox"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {

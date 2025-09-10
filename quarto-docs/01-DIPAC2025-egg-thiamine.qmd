@@ -6,6 +6,7 @@ format: html
 lightbox: true
 editor: source
 toc: true
+toc-depth: 4
 code-fold: true
 output-file: "output"
 ---
@@ -43,12 +44,12 @@ fertilization and water hardening.
 : The estimated total mass of eggs, in grams, for each fish. Calculated by reducing
 the total egg mass by 23%, which is the estimated increase in salmon egg weight
 after water hardening, fertilization is not expected to significantly increase
-egg weight (Fleming and Ng, 1987).
+egg weight (Fleming and Ng, 1987). I was using this to estimate fecundity
+before Arthur sent estimated egg counts, I am using his counts now.
 
 `est_fecund_n`
 : The total estimated fecundity, representing the total number of eggs produced 
-by each female. Calculated by dividing the estimated pre-hardening egg mass by
-the average egg mass.
+by each female. Provided by Arthur Hamlett, DIPAC. 
 
 `nmolT_g`
 : Nanomoles of thiamine per gram of egg.
@@ -65,7 +66,6 @@ the average egg mass.
 
 # Load libraries
 library(tidyverse)
-library(googlesheets4)
 library(patchwork)
 library(knitr)
 library(ggpmisc)
@@ -73,6 +73,8 @@ library(here)
 library(stringr) 
 library(ggridges)
 library(scales)
+library(broom)
+library(gt)
 
 # ggplot theme set
 theme_set(theme_bw())
@@ -242,11 +244,15 @@ Of 58 fish, 16 are deficient (28%), what would it look like if we group the 16
 lowest concentration fish for a deficient group, and the 16 highest concentration
 fish for a replete group?
 
-### Grouping Ideas
+## Grouping Ideas
 
-#### Lowest 16, Highest 16
+### Lowest 16, Highest 16
 
-##### Density Plots
+In this grouping, we would select all the thiamine deficient (<5 nmol T/g) fish
+for the low group, and the 16 fish with the highest egg thiamine concentrations
+for the high group.
+
+#### Density Plots
 
 ```{r}
 #| label: subset-low-high-group
@@ -345,7 +351,7 @@ patchwork_low_high_densities <- density_low_high_mefl +
 patchwork_low_high_densities
 ```
 
-##### Summary Stats
+#### Summary Stats
 
 ```{r}
 #| label: low-high-summary-stats
@@ -384,8 +390,7 @@ low_high_summary_table
 
 ```{r}
 #| label: low-high-gamete-est
-
-total_gametes_top_bot_16 <- scales::comma(sum(top_bottom_16$est_fecund_n))
+#| output: false
 
 deficient_gametes_top_bot_16 <- top_bottom_16 |> 
   filter(group == "deficient") |> 
@@ -413,12 +418,705 @@ top_16_females <- top_bottom_16 |>
 
 formatted_replete_id_list <- combine_words(top_16_females)
 
+# Calculate fish in each group and proportional gametes
+top_bottom_16_total_n <- length(top_bottom_16$fish_id)
+
+top_bot_16_deficient_n <- top_bottom_16 |> 
+  filter(group == "deficient") |> 
+  nrow()
+
+top_bot_16_replete_n <- top_bottom_16_total_n - top_bot_16_deficient_n 
+
+# Gametes
+## Even Split
+
+top_bot_16_even_split_gametes <- 90000 / 2 
+
+top_bot_16_even_split_gametes_per_fish_deficient <-
+  round(top_bot_16_even_split_gametes / top_bot_16_deficient_n, 0)
+
+top_bot_16_even_split_gametes_per_fish_replete <-
+  round(top_bot_16_even_split_gametes / top_bot_16_replete_n, 0)
+
+### Is it even possible to get that many gametes from the deficient group?
+top_bot_16_even_split_gametes_per_fish_deficient <= bottom_16$est_fecund_n
+
+# 1 fish comes up short, which fish?
+top_bot_16_short_deficient_fish <- bottom_16 |> 
+  filter(top_bot_16_even_split_gametes_per_fish_deficient > est_fecund_n)
+
+fmt_top_bot_16_short_deficient_fish  <- combine_words(
+  top_bot_16_short_deficient_fish$fish_id)
+
+fmt_top_bot_16_short_deficient_fish_gametes <- combine_words(comma(round(
+  top_bot_16_short_deficient_fish$est_fecund_n, 0)))
+
+# Is it possible for replete fish?
+top_bot_16_even_split_gametes_per_fish_replete <= top_16$est_fecund_n
+
+# 1 fish comes up short, which fish?
+top_bot_16_short_replete_fish <- top_16 |> 
+  filter(top_bot_16_even_split_gametes_per_fish_deficient > est_fecund_n)
+
+fmt_top_bot_16_short_replete_fish  <- combine_words(
+  top_bot_16_short_replete_fish$fish_id)
+
+fmt_top_bot_16_short_replete_fish_gametes <- combine_words(comma(round(
+  top_bot_16_short_replete_fish$est_fecund_n, 0)))
 ```
 
-The total estimated number of gametes in this grouping is 
-`{r} total_gametes_top_bot_16`, including `{r} deficient_gametes_top_bot_16`
-deficient and `{r} replete_gametes_top_bot_16` replete gametes.
+This group would contain `{r} top_bot_16_deficient_n` fish in the deficient group and `{r} top_bot_16_replete_n` fish in the replete group. If gametes were split evenly per group and per fish that would be `{r} comma(90000/2)` gametes per group and `{r} comma(top_bot_16_even_split_gametes_per_fish_deficient)` gametes per fish.
+
+Of the deficient fish, 
+`{r} fmt_top_bot_16_short_deficient_fish`
+comes up short with
+`{r} fmt_top_bot_16_short_deficient_fish_gametes`
+estimated gametes.
+
+Of the replete fish,
+`{r} fmt_top_bot_16_short_replete_fish`
+comes up short with
+`{r} fmt_top_bot_16_short_replete_fish_gametes`
+estimated gametes.
 
 The deficient females for this grouping are `{r} formatted_deficient_id_list`.
 
 The replete females for this grouping are `{r} formatted_replete_id_list`.
+
+#### T-tests
+
+```{r}
+#| label: top-bot-16-t-tests
+
+# T-test assumptions:
+## 1.Independence of Observations --- Yes
+## 2. Normality - shapiro.test()
+## 3. Continuous data --- Yes
+## 4. Random sampling --- Yes
+## 5. Homogeneity of variance - var.test()
+
+
+# T-tests and variance tests ---------------------------------------------------
+top_bot_16_tests <- long_top_bottom_16 |> 
+  group_by(variable_name) |> 
+  summarise(
+    t_test = list(
+      tidy(t.test(value ~ group, data = pick(dplyr::everything())))
+      ),
+    var_test = list(
+      tidy(var.test(value ~ group, data = pick(dplyr::everything())))
+      )
+  ) |> 
+  unnest(c(t_test, var_test), names_sep = "_")
+
+top_bot_16_shapiro_tests <- long_top_bottom_16 |> 
+  group_by(variable_name, group) |> 
+  summarise(shapiro_p = shapiro.test(value)$p.value) |> 
+  pivot_wider(
+    names_from = group,
+    values_from = shapiro_p,
+    names_prefix = "shapiro_p_"
+  )
+
+top_bot_16_test_results <- top_bot_16_tests |> 
+  left_join(top_bot_16_shapiro_tests, by = "variable_name") |> 
+  select(
+    Variable = variable_name,
+    `Shapiro P (Replete)` = shapiro_p_replete,
+    `Shapiro P (Deficient)` = shapiro_p_deficient,
+    `Var Test P` = var_test_p.value,
+    `t-statistic` = t_test_statistic,
+    `t-test P` = t_test_p.value
+  ) |> 
+  gt() |> 
+  tab_header(
+    title = "Top/Bottom 16 Group T-test Summaries"
+  ) |>
+  tab_style(
+    style = cell_fill(color = "lightblue"),
+    locations = cells_body(
+      columns = `t-test P`,
+      rows = `t-test P` < 0.05
+    )
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "orange"),
+    locations = cells_body(
+      columns = c(`Shapiro P (Replete)`, `Shapiro P (Deficient)`, `Var Test P`),
+      rows = `Shapiro P (Replete)` < 0.05 |
+             `Shapiro P (Deficient)` < 0.05 |
+             `Var Test P` < 0.05
+    )
+  ) |> 
+  fmt_number(
+    columns = dplyr::everything(),
+    rows = dplyr::everything(),
+    decimals = 3
+  )
+  
+# MEFL -------------------------------------------------------------------------
+## Test normality
+### Replete group
+shapiro.test(top_16$`mid-eye-fork-length`)
+
+### Deficient group
+shapiro.test(bottom_16$`mid-eye-fork-length`)
+
+## Test homogeneity of variance 
+var.test(`mid-eye-fork-length` ~ group, data = top_bottom_16)
+
+## T-test
+t.test()
+
+# Avg. Egg size ----------------------------------------------------------------
+
+# Est. Fecundity ---------------------------------------------------------------
+
+# nmolT_g ----------------------------------------------------------------------
+
+# nmolT_egg
+
+
+```
+
+### 50/50 split
+
+In this grouping, we would keep all `{r} length(dipac25_bkd_trim$fish_id)` fish 
+in the study and divide the low and high groups down the middle of egg thiamine concentrations (`{r} round(median(dipac25_bkd_trim$nmolT_g), 2)` nmol T/g).
+
+#### Density Plots
+
+```{r}
+#| label: fifty-fifty-grouping
+
+fifty_fifty <- dipac25_bkd_trim |> 
+  mutate(group = factor(if_else(nmolT_g >= median(nmolT_g), "high", "low"),
+                        levels = c("low", "high")))
+```
+
+```{r}
+#| label: fifty-fifty-density-dist
+#| message: false
+
+density_fifty_fifty_mefl <- ggplot(fifty_fifty, 
+                                aes(x = `mid-eye-fork-length`,
+                                    y = group,
+                                    fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_fifty_fifty_avg_egg_mass <- ggplot(fifty_fifty, aes(x = avg_egg_mass_g,
+                                                   y = group,
+                                                   fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_fifty_fifty_est_fecund <- ggplot(fifty_fifty, 
+                                      aes(
+                                        x = est_fecund_n,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_fifty_fifty_nmolT_g <- ggplot(fifty_fifty, 
+                                      aes(
+                                        x = nmolT_g,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_fifty_fifty_nmolT_egg <- ggplot(fifty_fifty, 
+                                      aes(
+                                        x = nmolT_egg,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+```
+
+```{r}
+#| label: fifty-fifty-combined-density-dist
+#| message: false
+
+patchwork_fifty_fifty_densities <- density_fifty_fifty_mefl +
+  density_fifty_fifty_avg_egg_mass +
+  density_fifty_fifty_est_fecund +
+  density_fifty_fifty_nmolT_g +
+  density_fifty_fifty_nmolT_egg +
+  plot_layout(axes = "collect")
+  
+patchwork_fifty_fifty_densities
+```
+
+#### Summary Stats
+
+```{r}
+#| label: fifty-fifty-summary-stats
+#| message: false
+
+fifty_fifty_long <- fifty_fifty |> 
+  select(fish_id, `mid-eye-fork-length`, avg_egg_mass_g, est_fecund_n, nmolT_g,
+         nmolT_egg, group) |> 
+  pivot_longer(
+    cols = c(
+      `mid-eye-fork-length`, avg_egg_mass_g, est_fecund_n, nmolT_g, nmolT_egg
+      ),
+    names_to = "variable_name",
+    values_to = "value"
+  )    
+  
+fifty_fifty_summary_table <- fifty_fifty_long |> 
+  group_by(variable_name, group) |> 
+  summarise(
+    n = n(),
+    mean = round(mean(value, na.rm = TRUE), 2),
+    sd = round(sd(value, na.rm = TRUE), 2),
+    min = round(min(value, na.rm = TRUE), 2),
+    max = round(max(value, na.rm = TRUE), 2),
+    median = round(median(value, na.rm = TRUE), 2)
+  ) |>
+  kable(
+    caption = "Summary Statistics for 50/50 Split Grouping",
+    col.names = c("Variable", "Group", "N", " Mean", "Std. Dev.", "Min", "Max",
+                  "Median"),
+    digits = 2
+  )
+
+fifty_fifty_summary_table
+
+```
+
+```{r}
+#| label: fifty-fifty-gamete-est
+#| output: false
+
+total_gametes_fifty_fifty <- scales::comma(sum(fifty_fifty$est_fecund_n))
+
+fifty_fifty_low <- fifty_fifty |> 
+  filter(group == "low")
+
+fifty_fifty_low_deficient_gametes <- fifty_fifty |> 
+  filter(group == "low" & deficient_conc) |> 
+  summarise(total = sum(est_fecund_n)) |> 
+  pull(total) |> 
+  comma()
+
+fifty_fifty_low_replete_gametes <- fifty_fifty |> 
+  filter(group == "low" & !deficient_conc) |> 
+  summarise(total = sum(est_fecund_n)) |> 
+  pull(total) |> 
+  comma()
+
+fifty_fifty_high_replete_gametes <- fifty_fifty |> 
+  filter(group == "high" & !deficient_conc) |> 
+  summarise(total = sum(est_fecund_n)) |> 
+  pull(total) |> 
+  comma()
+
+# Get deficent females low group
+fifty_fifty_low_deficient <- fifty_fifty |> 
+  filter(group == "low" & deficient_conc)
+
+fifty_fifty_low_deficient_females <- fifty_fifty_low_deficient |> 
+  pull(fish_id)
+
+fmt_fifty_fifty_low_deficient_ids <- combine_words(fifty_fifty_low_deficient_females)
+
+# Get replete females low group
+fifty_fifty_low_replete <- fifty_fifty |> 
+  filter(group == "low" & !deficient_conc)
+
+fifty_fifty_low_replete_females <- fifty_fifty_low_replete |> 
+  pull(fish_id)
+
+fmt_fifty_fifty_low_replete_ids <- combine_words(fifty_fifty_low_replete_females)
+
+# Get replete females high group
+
+
+fifty_fifty_high_replete <- fifty_fifty |> 
+  filter(group == "high" & !deficient_conc) 
+
+fifty_fifty_high_replete_females <- fifty_fifty_high_replete |> 
+  pull(fish_id)
+
+fmt_fifty_fifty_high_replete_ids <- combine_words(fifty_fifty_high_replete_females)
+
+# Calculate fish in each group and proportional gametes
+fifty_fifty_total_n <- length(fifty_fifty$fish_id)
+
+fifty_fifty_low_n <- fifty_fifty |> 
+  filter(group == "low") |> 
+  nrow()
+
+fifty_fifty_high_n <- fifty_fifty_total_n - fifty_fifty_low_n
+
+# Gametes
+## Even Split
+
+fifty_fifty_even_split_gametes <- 90000 / 2 
+
+fifty_fifty_even_split_gametes_per_fish_low <-
+  round(fifty_fifty_even_split_gametes / fifty_fifty_low_n, 0)
+
+fifty_fifty_even_split_gametes_per_fish_high <- 
+  round(fifty_fifty_even_split_gametes / fifty_fifty_high_n, 0)
+
+### Is it even possible to get that many gametes from the deficient group?
+fifty_fifty_even_split_gametes_per_fish_low <= fifty_fifty_low$est_fecund_n
+
+# 1 fish comes up short, which fish?
+fifty_fifty_short_low_fish <- fifty_fifty_low |> 
+  filter(fifty_fifty_even_split_gametes_per_fish_low > est_fecund_n)
+
+fmt_fifty_fifty_short_low_fish <- combine_words(
+  fifty_fifty_short_low_fish$fish_id)
+
+fmt_fifty_fifty_short_low_fish_gametes <- combine_words(comma(round(
+  fifty_fifty_short_low_fish$est_fecund_n, 0)))
+
+# Is it possible for replete fish?
+fifty_fifty_even_split_gametes_per_fish_high <= fifty_fifty_high_replete$est_fecund_n
+
+# All replete fish have enough gametes
+```
+
+This grouping would contain 
+`{r} fifty_fifty_low_n` 
+fish in the "low" group; of those fish
+`{r} length(fifty_fifty_low_deficient_females)` 
+would be considered "deficient" in egg thiamine concentration, 
+`{r} length(fifty_fifty_low_replete_females)`
+would be considered "replete". The "high" group would contain 
+`{r} fifty_fifty_high_n` 
+"replete" fish.
+
+Our 90,000 fish allowance would include `{r} comma(90000/2)` "low" and
+`{r} comma(90000/2)` "high" gametes if we split the groups evenly, this works out
+to `{r} comma(90000 / length(fifty_fifty$fish_id))` gametes
+per fish.
+
+Of the low group, fish 
+`{r} fmt_fifty_fifty_short_low_fish`
+does not have enough estimated gametes 
+(`{r} fmt_fifty_fifty_short_low_fish_gametes`).
+All of the high group fish have enough estimated gametes.
+
+The deficient females in the "low" group for this grouping are 
+`{r} fmt_fifty_fifty_low_deficient_ids`. The replete females in the "low"
+group for this grouping are `{r} fmt_fifty_fifty_low_replete_ids`.
+
+The replete females in the "high" group for this grouping are 
+`{r} fmt_fifty_fifty_high_replete_ids`.
+
+### 5 nmol T/g split
+
+In this grouping, we would keep all `{r} length(dipac25_bkd_trim$fish_id)` fish 
+in the study and divide the deficient and replete groups at the 5 nmol T/g benchmark. This would result in an uneven split.
+
+#### Density Plots
+
+```{r}
+#| label: five-nmol-grouping
+
+five_nmol <- dipac25_bkd_trim |> 
+  mutate(group = factor(if_else(nmolT_g >= 5, "replete", "deficient"),
+                        levels = c("deficient", "replete")))
+```
+
+```{r}
+#| label: five-nmol-density-dist
+#| message: false
+
+density_five_nmol_mefl <- ggplot(five_nmol, 
+                                aes(x = `mid-eye-fork-length`,
+                                    y = group,
+                                    fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_five_nmol_avg_egg_mass <- ggplot(five_nmol, aes(x = avg_egg_mass_g,
+                                                   y = group,
+                                                   fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_five_nmol_est_fecund <- ggplot(five_nmol, 
+                                      aes(
+                                        x = est_fecund_n,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_five_nmol_nmolT_g <- ggplot(five_nmol, 
+                                      aes(
+                                        x = nmolT_g,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+
+density_five_nmol_nmolT_egg <- ggplot(five_nmol, 
+                                      aes(
+                                        x = nmolT_egg,
+                                        y = group,
+                                        fill = group)) +
+  geom_density_ridges(
+    jittered_points = TRUE,
+    position = "raincloud",
+    alpha = 0.75
+  ) +
+  guides(fill = "none") +
+  scale_fill_manual(values = my_palette)
+```
+
+```{r}
+#| label: five-nmol-combined-density-dist
+#| message: false
+
+patchwork_five_nmol_densities <- density_five_nmol_mefl +
+  density_five_nmol_avg_egg_mass +
+  density_five_nmol_est_fecund +
+  density_five_nmol_nmolT_g +
+  density_five_nmol_nmolT_egg +
+  plot_layout(axes = "collect")
+  
+patchwork_five_nmol_densities
+```
+
+#### Summary Stats
+
+```{r}
+#| label: five-nmol-summary-stats
+#| message: false
+
+five_nmol_long <- five_nmol |> 
+  select(fish_id, `mid-eye-fork-length`, avg_egg_mass_g, est_fecund_n, nmolT_g,
+         nmolT_egg, group) |> 
+  pivot_longer(
+    cols = c(
+      `mid-eye-fork-length`, avg_egg_mass_g, est_fecund_n, nmolT_g, nmolT_egg
+      ),
+    names_to = "variable_name",
+    values_to = "value"
+  )    
+  
+five_nmol_summary_table <- five_nmol_long |> 
+  group_by(variable_name, group) |> 
+  summarise(
+    n = n(),
+    mean = round(mean(value, na.rm = TRUE), 2),
+    sd = round(sd(value, na.rm = TRUE), 2),
+    min = round(min(value, na.rm = TRUE), 2),
+    max = round(max(value, na.rm = TRUE), 2),
+    median = round(median(value, na.rm = TRUE), 2)
+  ) |>
+  kable(
+    caption = "Summary Statistics for 5 nmol T/g Split Grouping",
+    col.names = c("Variable", "Group", "N", " Mean", "Std. Dev.", "Min", "Max",
+                  "Median"),
+    digits = 2
+  )
+
+five_nmol_summary_table
+
+```
+
+```{r}
+#| label: five-nmol-gamete-est
+#| output: false
+#| message: false
+
+total_gametes_five_nmol <- round(sum(five_nmol$est_fecund_n), 0)
+
+five_nmol_deficient_gametes <- five_nmol |> 
+  filter(group == "deficient" & deficient_conc) |> 
+  summarise(total = sum(est_fecund_n)) |> 
+  pull(total) |> 
+  comma()
+
+five_nmol_replete_gametes <- five_nmol |> 
+  filter(group == "replete" & !deficient_conc) |> 
+  summarise(total = sum(est_fecund_n)) |> 
+  pull(total) |> 
+  comma()
+
+# Get deficent females 
+five_nmol_deficient <- five_nmol |> 
+  filter(group == "deficient" & deficient_conc)
+
+five_nmol_deficient_females <- five_nmol_deficient |> 
+  pull(fish_id)
+
+fmt_five_nmol_deficient_ids <- combine_words(five_nmol_deficient_females)
+
+# Get replete females group
+five_nmol_replete <- five_nmol |> 
+  filter(group == "replete" & !deficient_conc) 
+
+five_nmol_replete_females <- five_nmol_replete |> 
+  pull(fish_id)
+
+fmt_five_nmol_replete_ids <- combine_words(five_nmol_replete_females)
+
+# Calculate fish in each group and proportional gametes
+five_nmol_total_n <- length(five_nmol$fish_id)
+
+five_nmol_deficient_n <- length(five_nmol_deficient$fish_id)
+
+five_nmol_replete_n <- length(five_nmol_replete$fish_id)
+
+five_nmol_deficient_prop <- five_nmol_deficient_n / five_nmol_total_n
+
+five_nmol_replete_prop <- five_nmol_replete_n / five_nmol_total_n
+
+# Gametes
+## Even Split
+
+five_nmol_even_split_gametes <- 90000 / 2 
+
+five_nmol_even_split_gametes_per_fish_deficient <-
+  round(five_nmol_even_split_gametes / five_nmol_deficient_n, 0)
+
+five_nmol_even_split_gametes_per_fish_replete <- 
+  round(five_nmol_even_split_gametes / five_nmol_replete_n, 0)
+
+### Is it even possible to get that many gametes from the deficient group?
+five_nmol_even_split_gametes_per_fish_deficient <= five_nmol_deficient$est_fecund_n
+
+# 1 fish comes up short, which fish?
+five_nmol_short_deficient_fish <- five_nmol_deficient |> 
+  filter(five_nmol_even_split_gametes_per_fish_deficient > est_fecund_n)
+
+fmt_five_nmol_short_deficient_fish <- combine_words(
+  five_nmol_short_deficient_fish$fish_id)
+
+fmt_five_nmol_short_deficient_fish_gametes <- combine_words(comma(round(
+  five_nmol_short_deficient_fish$est_fecund_n, 0)))
+
+# Is it possible for replete fish?
+five_nmol_even_split_gametes_per_fish_replete <= five_nmol_replete$est_fecund_n
+
+## Proportional split
+
+five_nmol_prop_split_gametes_deficient <- 
+  round(five_nmol_deficient_prop * 90000, 0) 
+
+five_nmol_prop_split_gametes_per_fish_deficient <- 
+  round(five_nmol_prop_split_gametes_deficient / five_nmol_deficient_n, 0) 
+
+five_nmol_prop_split_gametes_replete <- 
+  round(five_nmol_replete_prop * 90000, 0) 
+
+five_nmol_prop_split_gametes_per_fish_replete <- 
+  round(five_nmol_prop_split_gametes_replete / five_nmol_replete_n, 0) 
+
+# Is this possible for deficient fish?
+
+five_nmol_prop_split_gametes_per_fish_deficient <= five_nmol_deficient$est_fecund_n
+
+# 1 fish come up short, which fish?
+five_nmol_short_prop_deficient_fish <- five_nmol_deficient |> 
+  filter(five_nmol_prop_split_gametes_per_fish_deficient > est_fecund_n)
+
+fmt_five_nmol_short_prop_deficient_fish <- combine_words(
+  five_nmol_short_prop_deficient_fish$fish_id)
+
+fmt_five_nmol_short_prop_deficient_fish_gametes <- combine_words(comma(round(
+  five_nmol_short_prop_deficient_fish$est_fecund_n, 0)))
+
+# Possible for replete group? 
+five_nmol_prop_split_gametes_per_fish_replete <= 
+  five_nmol_replete$est_fecund_n
+
+# All replete fish have enough gametes
+```
+
+This grouping would contain `{r} five_nmol_deficient_n` fish in the "deficient" group and `{r} five_nmol_replete_n` fish in the "replete" group. Proportionately
+that is `{r} round(five_nmol_deficient_prop * 100, 1)`% deficient fish and
+`{r} round(five_nmol_replete_prop * 100, 1)`% replete fish.
+
+If we wanted to have an even number of gametes per group (i.e., 
+`{r} comma(90000/2)` gametes), it would require 
+`{r} comma(five_nmol_even_split_gametes_per_fish_deficient)` gametes per
+deficient fish and
+`{r} comma(five_nmol_even_split_gametes_per_fish_replete)` gametes per
+replete fish. One deficient fish (`{r} fmt_five_nmol_short_deficient_fish`)
+is short of this many estimated gametes 
+(`{r} fmt_five_nmol_short_deficient_fish_gametes`). 
+This shortage could be covered by other deficient fish. All
+of the replete fish have enough gametes for this split.
+
+If we wanted to have a proportional number of gametes for each group (i.e.,
+`{r} comma(five_nmol_prop_split_gametes_deficient)` gametes for the deficient group and `{r} comma(five_nmol_prop_split_gametes_replete)` gametes for the replete group), it would require 
+`{r} comma(five_nmol_prop_split_gametes_per_fish_deficient)` 
+per fish for each group. Again, fish
+`{r} fmt_five_nmol_short_prop_deficient_fish` from the deficient group comes up short (only `{r} fmt_five_nmol_short_prop_deficient_fish_gametes` estimated gametes). This shortage could be covered by other deficient females. For the replete group, all fish have enough estimated gametes.
+
+The deficient females in this grouping are: 
+`{r} fmt_five_nmol_deficient_ids`. 
+
+The replete females in this grouping are:
+`{r} fmt_five_nmol_replete_ids`.
+
+## Linear Models
+ 
+```{r}
+#| label: total-egg-mass-vs-conc
+
+ggplot(data = dipac25_bkd_trim, aes(x = nmolT_g, y = total_egg_mass_g)) +
+  geom_point() +
+  stat_poly_line() +
+  stat_poly_eq(use_label(c("eq", "r2", "p")))
+
+
+```
+

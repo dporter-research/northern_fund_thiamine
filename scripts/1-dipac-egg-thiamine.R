@@ -23,7 +23,6 @@ dipac_females <- dipac_f_meta_thiamine |>
   mutate(
     mate_group = factor(paste0(mate1, "+", mate2)),
     avg_egg_mass_g = egg_mass_g/n_eggs,
-    est_fecund_n = (est_pre_hardened_egg_mass_g) / avg_egg_mass_g,
     deficient_conc = nmolT_g < 5.0,
     deficient_totalT = nmolT_egg < 1.0
   ) |> 
@@ -34,8 +33,8 @@ dipac_females <- dipac_f_meta_thiamine |>
     whatman_card_number, card_position, comments
   )
 
-#write_csv(dipac_females, file = "data/processed/dipac_females.csv")
-#write_rds(dipac_females, file = "data/processed/dipac_females.rds")
+write_csv(dipac_females, file = "data/processed/dipac_females.csv")
+write_rds(dipac_females, file = "data/processed/dipac_females.rds")
 
 # Define BKD fish from Steve's email
 bkd_fish <- c("f13", "f34")
