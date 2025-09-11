@@ -79,4 +79,13 @@ egg_conc_violin <- ggplot(data = andrew_creek_fish, aes(x = year, y = nmolT_g,
 
 egg_conc_violin
 
+ggsave(
+  "output/plots/andrew_creek_thiamine_conc_yearly.png",
+  egg_conc_violin,
+  width = 7,
+  height = 5,
+  dpi = 300,
+  units = "in"
+)
+
 ## Total egg thiamine nmols ----------------------------------------------------

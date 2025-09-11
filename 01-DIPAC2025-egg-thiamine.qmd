@@ -3,12 +3,17 @@ title: "Chinook Egg Thiamine, Macaulay 2025"
 author: "Drew Porter"
 date-modified: today
 format: html
+fig-width: 7
+fig-height: 5
+fig-dpi: 300
 lightbox: true
 editor: source
 toc: true
 toc-depth: 4
 code-fold: true
 output-file: "output"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Introduction
@@ -483,10 +488,11 @@ The deficient females for this grouping are `{r} formatted_deficient_id_list`.
 
 The replete females for this grouping are `{r} formatted_replete_id_list`.
 
-#### T-tests
+#### Statistical Tests
 
 ```{r}
-#| label: top-bot-16-t-tests
+#| label: top-bot-16-parametric-tests
+#| message: false
 
 # T-test assumptions:
 ## 1.Independence of Observations --- Yes
@@ -495,87 +501,166 @@ The replete females for this grouping are `{r} formatted_replete_id_list`.
 ## 4. Random sampling --- Yes
 ## 5. Homogeneity of variance - var.test()
 
+variables_to_test_parametric <- names(top_bottom_16[c(2,3,6,7,9)])
 
-# T-tests and variance tests ---------------------------------------------------
-top_bot_16_tests <- long_top_bottom_16 |> 
-  group_by(variable_name) |> 
-  summarise(
-    t_test = list(
-      tidy(t.test(value ~ group, data = pick(dplyr::everything())))
-      ),
-    var_test = list(
-      tidy(var.test(value ~ group, data = pick(dplyr::everything())))
-      )
-  ) |> 
-  unnest(c(t_test, var_test), names_sep = "_")
-
-top_bot_16_shapiro_tests <- long_top_bottom_16 |> 
-  group_by(variable_name, group) |> 
-  summarise(shapiro_p = shapiro.test(value)$p.value) |> 
-  pivot_wider(
-    names_from = group,
-    values_from = shapiro_p,
-    names_prefix = "shapiro_p_"
-  )
-
-top_bot_16_test_results <- top_bot_16_tests |> 
-  left_join(top_bot_16_shapiro_tests, by = "variable_name") |> 
-  select(
-    Variable = variable_name,
-    `Shapiro P (Replete)` = shapiro_p_replete,
-    `Shapiro P (Deficient)` = shapiro_p_deficient,
-    `Var Test P` = var_test_p.value,
-    `t-statistic` = t_test_statistic,
-    `t-test P` = t_test_p.value
-  ) |> 
-  gt() |> 
-  tab_header(
-    title = "Top/Bottom 16 Group T-test Summaries"
-  ) |>
-  tab_style(
-    style = cell_fill(color = "lightblue"),
-    locations = cells_body(
-      columns = `t-test P`,
-      rows = `t-test P` < 0.05
+run_parametric_tests <- function(data, var_name) {
+  
+  
+  var_res <- tidy(
+    var.test(data[[var_name]] ~ data$group, data = data)
     )
-  ) |> 
-  tab_style(
-    style = cell_fill(color = "orange"),
-    locations = cells_body(
-      columns = c(`Shapiro P (Replete)`, `Shapiro P (Deficient)`, `Var Test P`),
-      rows = `Shapiro P (Replete)` < 0.05 |
-             `Shapiro P (Deficient)` < 0.05 |
-             `Var Test P` < 0.05
+  
+  shapiro_replete_res <- tidy(
+    shapiro.test(data[[var_name]][data$group == "replete"])
     )
-  ) |> 
-  fmt_number(
-    columns = dplyr::everything(),
-    rows = dplyr::everything(),
-    decimals = 3
+  
+  shapiro_deficient_res <- tidy(
+    shapiro.test(data[[var_name]][data$group == "deficient"])
+    )
+  
+  t_test_res <- tidy(
+    t.test(data[[var_name]] ~ data$group, data = data, var.equal = TRUE)
   )
   
-# MEFL -------------------------------------------------------------------------
-## Test normality
-### Replete group
-shapiro.test(top_16$`mid-eye-fork-length`)
+  tibble(
+    Variable = var_name,
+    `Shapiro p (replete)` = shapiro_replete_res$p.value,
+    `Shapiro p (deficient)` = shapiro_deficient_res$p.value,
+    `Var test p` = var_res$p.value,
+    `t-statistic` = case_when(
+      `Shapiro p (replete)` < 0.05 |
+        `Shapiro p (deficient)` < 0.05 |
+        `Var test p` < 0.05 ~ NA,
+      TRUE ~ t_test_res$statistic
+    ),
+    `t-test p` = case_when(
+      `Shapiro p (replete)` < 0.05 |
+        `Shapiro p (deficient)` < 0.05 |
+        `Var test p` < 0.05 ~ NA,
+      TRUE ~ t_test_res$p.value
+      )    
+    )  
+  
+}
 
-### Deficient group
-shapiro.test(bottom_16$`mid-eye-fork-length`)
+parametric_list_results <- map(
+  variables_to_test_parametric, ~run_parametric_tests(top_bottom_16, .x)
+  ) 
+parametric_test_results <- list_rbind(parametric_list_results)
 
-## Test homogeneity of variance 
-var.test(`mid-eye-fork-length` ~ group, data = top_bottom_16)
+parametric_table <- parametric_test_results |> 
+  gt() |> 
+  tab_header(
+    title = "Parametric Statistical Tests",
+    subtitle = "Top/Bottom 16 Fish"
+  ) |> 
+  tab_spanner(
+    label = md("Shapiro-Wilk Normality Test"),
+    columns = c(`Shapiro p (replete)`, `Shapiro p (deficient)`)
+  ) |> 
+  tab_spanner(
+    label = "F Test",
+    columns = `Var test p`
+  ) |> 
+  tab_spanner(
+    label = "Student's t-Test",
+    columns = c(`t-statistic`, `t-test p`)
+  ) |> 
+  cols_label(
+    `Shapiro p (replete)` = md("*p*~replete~"),
+    `Shapiro p (deficient)` = md("*p*~deficient~"),
+    `Var test p`= md("*p*"),
+    `t-test p` = md("*p*")
+  ) |> 
+  tab_style(
+    style = list(
+      cell_text(color = "red")
+    ),
+    locations = list(
+      cells_body(
+      columns = `Shapiro p (replete)`,
+      rows = `Shapiro p (replete)` < 0.05 
+    ),
+    cells_body(
+      columns = `Shapiro p (deficient)`,
+      rows = `Shapiro p (deficient)` < 0.05 
+    ),
+    cells_body(
+      columns = `Var test p`,
+      rows = `Var test p` < 0.05 
+    )
+    )
+  ) |>
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) |> 
+  sub_values(
+    columns = contains("p"),
+    fn = \(x) x < .001, replacement = "<0.001"
+  )
+  
+parametric_table
 
-## T-test
-t.test()
+```
 
-# Avg. Egg size ----------------------------------------------------------------
+```{r}
+#| label: top-bot-16-non-parametric-tests
+#| message: false
 
-# Est. Fecundity ---------------------------------------------------------------
+ # Mann-Whitney U Test Assumptions:
+ # 1. All the observations from both groups are independent of each other,
+ # 2. The responses are at least ordinal (i.e., one can at least say, of any two
+ #    observations, which is the greater),
+ # 3. Under the null hypothesis H0, the distributions of both populations are
+ #    identical.
+ # 4. The alternative hypothesis H1 is that the distributions are not identical.
 
-# nmolT_g ----------------------------------------------------------------------
+variables_to_test_non_parametric <- names(top_bottom_16[c(7,9)])
 
-# nmolT_egg
+run_non_parametric_tests <- function(data, var_name) {
+  
+  wilcox_res <- tidy(
+    wilcox.test(data[[var_name]] ~ data$group, data = data)
+    )
+  
+  tibble(
+    Variable = var_name,
+    `Mann-Whitney U p` = wilcox_res$p.value,
+    `W statistic` = wilcox_res$statistic
+    )  
+  
+}
 
+non_parametric_list_results <- map(
+  variables_to_test_non_parametric, ~run_non_parametric_tests(top_bottom_16, .x)
+  ) 
+non_parametric_test_results <- list_rbind(non_parametric_list_results)
+
+non_parametric_table <- non_parametric_test_results |> 
+  gt() |> 
+  tab_header(
+    title = "Non-Parametric Statistical Tests",
+    subtitle = "Top/Bottom 16 Fish"
+  ) |> 
+  tab_spanner(
+    label = md("Mann-Whitney U"),
+    columns = c(`Mann-Whitney U p`, `W statistic`)
+  ) |> 
+  cols_label(
+    `Mann-Whitney U p` = md("*p*"),
+    `W statistic` = "W"
+  ) |> 
+    fmt_number(
+    columns = everything(),
+    decimals = 1
+  ) |> 
+  sub_values(
+    columns = `Mann-Whitney U p`,
+    fn = \(x) x < .001, replacement = "<0.001"
+  )
+
+non_parametric_table
 
 ```
 
@@ -1106,6 +1191,10 @@ The deficient females in this grouping are:
 
 The replete females in this grouping are:
 `{r} fmt_five_nmol_replete_ids`.
+
+## Andrew Creek Stock Thiamine Concentrations
+
+![Andrew Creek stock Chinook salmon thiamine concentrations. The dashed red line indicates 5 nmol T/g, the threshold for deficient eggs.](output/plots/andrew_creek_thiamine_conc_yearly.png)
 
 ## Linear Models
  
