@@ -80,6 +80,15 @@ library(ggridges)
 library(scales)
 library(broom)
 library(gt)
+library(corrplot)
+library(GGally)
+library(corrr)
+library(rstatix)
+library(glue)
+library(flexmix)
+library(mclust)
+library(factoextra)
+
 
 # ggplot theme set
 theme_set(theme_bw())
@@ -87,12 +96,6 @@ theme_set(theme_bw())
 # color palette
 my_palette <- c("#1F77B4FF", "#FF7F0EFF", "#2CA02CFF", "#D62728FF", "#9467BDFF",
                 "#8C564BFF", "#E377C2FF", "#7F7F7FFF", "#BCBD22FF", "#17BECFFF")
-
-
-options(
-  ggplot2.discrete.colour = list(scale_color_manual(values = my_palette)),
-  ggplot2.discrete.fill = list(scale_fill_manual(values = my_palette))
-)
 
 ```
 
@@ -105,7 +108,22 @@ dipac25 <- read_rds(here("data/processed/dipac_females.rds"))
 dipac25_trim <- dipac25 |> 
   select(fish_id, `mid-eye-fork-length`, avg_egg_mass_g, total_egg_mass_g,
          est_pre_hardened_egg_mass_g, est_fecund_n, nmolT_g, deficient_conc, 
-         nmolT_egg, deficient_totalT)
+         nmolT_egg, deficient_totalT) |> 
+  mutate(
+    drew_est_fecund = avg_egg_mass_g * est_pre_hardened_egg_mass_g,
+    deficient_conc = factor(if_else(deficient_conc, "deficient", "replete", NA)),
+    deficient_totalT = factor(if_else(deficient_totalT, "deficient", "replete", NA))
+    )
+
+# I want to check out nmol thiamine/egg but I don't have an established
+# criteria for deficiency with this metric. I am going to take the bottom
+# 25% of eggs and group them, and the top 75% and group them for exploration
+
+nmol_egg_quant <- quantile(dipac25_trim$nmolT_egg)
+
+dipac25_trim <- dipac25_trim |> 
+  mutate(nmol_egg_status = factor(if_else(nmolT_egg > nmol_egg_quant[2][[1]],
+                                   "top75", "bottom25", NA)))
 
 # These fish tested positive for BKD and cannot be included in the study
 bkd_fish <- c("f13", "f34")
@@ -178,6 +196,7 @@ histo_patchwork <- histo_mefl + histo_avg_egg_mass + histo_est_fecund +
 
 histo_patchwork
 ```
+
 Everything is looking pretty normally distributed.
 
 ### Summary Statistics
@@ -235,7 +254,7 @@ More than 25% of individuals eggs are deficient on a concentration basis.
 dipac25_bkd_trim |> 
   summarise(
     n = n(),
-    deficient = sum(deficient_conc),
+    deficient = sum(deficient_conc == "deficient"),
     deficient_perc = (deficient / n) * 100
   )  |> 
   kable(
@@ -355,6 +374,186 @@ patchwork_low_high_densities <- density_low_high_mefl +
   
 patchwork_low_high_densities
 ```
+
+#### Statistical Tests
+
+```{r}
+#| label: top-bot-16-parametric-tests
+#| message: false
+
+# T-test assumptions:
+## 1.Independence of Observations --- Yes
+## 2. Normality - shapiro.test()
+## 3. Continuous data --- Yes
+## 4. Random sampling --- Yes
+## 5. Homogeneity of variance - var.test()
+
+variables_to_test_parametric <- names(top_bottom_16[c(2,3,6,7,9)])
+
+run_parametric_tests <- function(data, var_name) {
+  
+  
+  var_res <- tidy(
+    var.test(data[[var_name]] ~ data$group, data = data)
+    )
+  
+  shapiro_replete_res <- tidy(
+    shapiro.test(data[[var_name]][data$group == "replete"])
+    )
+  
+  shapiro_deficient_res <- tidy(
+    shapiro.test(data[[var_name]][data$group == "deficient"])
+    )
+  
+  t_test_res <- tidy(
+    t.test(data[[var_name]] ~ data$group, data = data, var.equal = TRUE)
+  )
+  
+  tibble(
+    Variable = var_name,
+    `Shapiro p (replete)` = shapiro_replete_res$p.value,
+    `Shapiro p (deficient)` = shapiro_deficient_res$p.value,
+    `Var test p` = var_res$p.value,
+    `t-statistic` = case_when(
+      `Shapiro p (replete)` < 0.05 |
+        `Shapiro p (deficient)` < 0.05 |
+        `Var test p` < 0.05 ~ NA,
+      TRUE ~ t_test_res$statistic
+    ),
+    `t-test p` = case_when(
+      `Shapiro p (replete)` < 0.05 |
+        `Shapiro p (deficient)` < 0.05 |
+        `Var test p` < 0.05 ~ NA,
+      TRUE ~ t_test_res$p.value
+      )    
+    )  
+  
+}
+
+parametric_list_results <- purrr::map(
+  variables_to_test_parametric, ~run_parametric_tests(top_bottom_16, .x)
+  ) 
+parametric_test_results <- list_rbind(parametric_list_results)
+
+parametric_table <- parametric_test_results |> 
+  gt() |> 
+  tab_header(
+    title = "Parametric Statistical Tests",
+    subtitle = "Top/Bottom 16 Fish"
+  ) |> 
+  tab_spanner(
+    label = md("Shapiro-Wilk Normality Test"),
+    columns = c(`Shapiro p (replete)`, `Shapiro p (deficient)`)
+  ) |> 
+  tab_spanner(
+    label = "F Test",
+    columns = `Var test p`
+  ) |> 
+  tab_spanner(
+    label = "Student's t-Test",
+    columns = c(`t-statistic`, `t-test p`)
+  ) |> 
+  cols_label(
+    `Shapiro p (replete)` = md("*p*~replete~"),
+    `Shapiro p (deficient)` = md("*p*~deficient~"),
+    `Var test p`= md("*p*"),
+    `t-test p` = md("*p*")
+  ) |> 
+  tab_style(
+    style = list(
+      cell_text(color = "red")
+    ),
+    locations = list(
+      cells_body(
+      columns = `Shapiro p (replete)`,
+      rows = `Shapiro p (replete)` < 0.05 
+    ),
+    cells_body(
+      columns = `Shapiro p (deficient)`,
+      rows = `Shapiro p (deficient)` < 0.05 
+    ),
+    cells_body(
+      columns = `Var test p`,
+      rows = `Var test p` < 0.05 
+    )
+    )
+  ) |>
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) |> 
+  sub_values(
+    columns = contains("p"),
+    fn = \(x) x < .001, replacement = "<0.001"
+  )
+  
+parametric_table
+
+```
+
+Between the two groups, mid-eye-fork-length, average egg mass (g), and estimated fecundity are not statistically different. Egg thiamine concentration and total egg thiamine violate normality and/or homogeneity of variance assumptions and will be tested with a non-parametric alternative.
+
+```{r}
+#| label: top-bot-16-non-parametric-tests
+#| message: false
+
+ # Mann-Whitney U Test Assumptions:
+ # 1. All the observations from both groups are independent of each other,
+ # 2. The responses are at least ordinal (i.e., one can at least say, of any two
+ #    observations, which is the greater),
+ # 3. Under the null hypothesis H0, the distributions of both populations are
+ #    identical.
+ # 4. The alternative hypothesis H1 is that the distributions are not identical.
+
+variables_to_test_non_parametric <- names(top_bottom_16[c(7,9)])
+
+run_non_parametric_tests <- function(data, var_name) {
+  
+  wilcox_res <- tidy(
+    wilcox.test(data[[var_name]] ~ data$group, data = data)
+    )
+  
+  tibble(
+    Variable = var_name,
+    `Mann-Whitney U p` = wilcox_res$p.value,
+    `W statistic` = wilcox_res$statistic
+    )  
+  
+}
+
+non_parametric_list_results <- purrr::map(
+  variables_to_test_non_parametric, ~run_non_parametric_tests(top_bottom_16, .x)
+  ) 
+non_parametric_test_results <- list_rbind(non_parametric_list_results)
+
+non_parametric_table <- non_parametric_test_results |> 
+  gt() |> 
+  tab_header(
+    title = "Non-Parametric Statistical Tests",
+    subtitle = "Top/Bottom 16 Fish"
+  ) |> 
+  tab_spanner(
+    label = md("Mann-Whitney U"),
+    columns = c(`Mann-Whitney U p`, `W statistic`)
+  ) |> 
+  cols_label(
+    `Mann-Whitney U p` = md("*p*"),
+    `W statistic` = "W"
+  ) |> 
+    fmt_number(
+    columns = everything(),
+    decimals = 1
+  ) |> 
+  sub_values(
+    columns = `Mann-Whitney U p`,
+    fn = \(x) x < .001, replacement = "<0.001"
+  )
+
+non_parametric_table
+
+```
+
+Egg thiamine concentration and total egg thiamine are statistically significantly different between the low and high groups.
 
 #### Summary Stats
 
@@ -487,182 +686,6 @@ estimated gametes.
 The deficient females for this grouping are `{r} formatted_deficient_id_list`.
 
 The replete females for this grouping are `{r} formatted_replete_id_list`.
-
-#### Statistical Tests
-
-```{r}
-#| label: top-bot-16-parametric-tests
-#| message: false
-
-# T-test assumptions:
-## 1.Independence of Observations --- Yes
-## 2. Normality - shapiro.test()
-## 3. Continuous data --- Yes
-## 4. Random sampling --- Yes
-## 5. Homogeneity of variance - var.test()
-
-variables_to_test_parametric <- names(top_bottom_16[c(2,3,6,7,9)])
-
-run_parametric_tests <- function(data, var_name) {
-  
-  
-  var_res <- tidy(
-    var.test(data[[var_name]] ~ data$group, data = data)
-    )
-  
-  shapiro_replete_res <- tidy(
-    shapiro.test(data[[var_name]][data$group == "replete"])
-    )
-  
-  shapiro_deficient_res <- tidy(
-    shapiro.test(data[[var_name]][data$group == "deficient"])
-    )
-  
-  t_test_res <- tidy(
-    t.test(data[[var_name]] ~ data$group, data = data, var.equal = TRUE)
-  )
-  
-  tibble(
-    Variable = var_name,
-    `Shapiro p (replete)` = shapiro_replete_res$p.value,
-    `Shapiro p (deficient)` = shapiro_deficient_res$p.value,
-    `Var test p` = var_res$p.value,
-    `t-statistic` = case_when(
-      `Shapiro p (replete)` < 0.05 |
-        `Shapiro p (deficient)` < 0.05 |
-        `Var test p` < 0.05 ~ NA,
-      TRUE ~ t_test_res$statistic
-    ),
-    `t-test p` = case_when(
-      `Shapiro p (replete)` < 0.05 |
-        `Shapiro p (deficient)` < 0.05 |
-        `Var test p` < 0.05 ~ NA,
-      TRUE ~ t_test_res$p.value
-      )    
-    )  
-  
-}
-
-parametric_list_results <- map(
-  variables_to_test_parametric, ~run_parametric_tests(top_bottom_16, .x)
-  ) 
-parametric_test_results <- list_rbind(parametric_list_results)
-
-parametric_table <- parametric_test_results |> 
-  gt() |> 
-  tab_header(
-    title = "Parametric Statistical Tests",
-    subtitle = "Top/Bottom 16 Fish"
-  ) |> 
-  tab_spanner(
-    label = md("Shapiro-Wilk Normality Test"),
-    columns = c(`Shapiro p (replete)`, `Shapiro p (deficient)`)
-  ) |> 
-  tab_spanner(
-    label = "F Test",
-    columns = `Var test p`
-  ) |> 
-  tab_spanner(
-    label = "Student's t-Test",
-    columns = c(`t-statistic`, `t-test p`)
-  ) |> 
-  cols_label(
-    `Shapiro p (replete)` = md("*p*~replete~"),
-    `Shapiro p (deficient)` = md("*p*~deficient~"),
-    `Var test p`= md("*p*"),
-    `t-test p` = md("*p*")
-  ) |> 
-  tab_style(
-    style = list(
-      cell_text(color = "red")
-    ),
-    locations = list(
-      cells_body(
-      columns = `Shapiro p (replete)`,
-      rows = `Shapiro p (replete)` < 0.05 
-    ),
-    cells_body(
-      columns = `Shapiro p (deficient)`,
-      rows = `Shapiro p (deficient)` < 0.05 
-    ),
-    cells_body(
-      columns = `Var test p`,
-      rows = `Var test p` < 0.05 
-    )
-    )
-  ) |>
-  fmt_number(
-    columns = everything(),
-    decimals = 3
-  ) |> 
-  sub_values(
-    columns = contains("p"),
-    fn = \(x) x < .001, replacement = "<0.001"
-  )
-  
-parametric_table
-
-```
-
-```{r}
-#| label: top-bot-16-non-parametric-tests
-#| message: false
-
- # Mann-Whitney U Test Assumptions:
- # 1. All the observations from both groups are independent of each other,
- # 2. The responses are at least ordinal (i.e., one can at least say, of any two
- #    observations, which is the greater),
- # 3. Under the null hypothesis H0, the distributions of both populations are
- #    identical.
- # 4. The alternative hypothesis H1 is that the distributions are not identical.
-
-variables_to_test_non_parametric <- names(top_bottom_16[c(7,9)])
-
-run_non_parametric_tests <- function(data, var_name) {
-  
-  wilcox_res <- tidy(
-    wilcox.test(data[[var_name]] ~ data$group, data = data)
-    )
-  
-  tibble(
-    Variable = var_name,
-    `Mann-Whitney U p` = wilcox_res$p.value,
-    `W statistic` = wilcox_res$statistic
-    )  
-  
-}
-
-non_parametric_list_results <- map(
-  variables_to_test_non_parametric, ~run_non_parametric_tests(top_bottom_16, .x)
-  ) 
-non_parametric_test_results <- list_rbind(non_parametric_list_results)
-
-non_parametric_table <- non_parametric_test_results |> 
-  gt() |> 
-  tab_header(
-    title = "Non-Parametric Statistical Tests",
-    subtitle = "Top/Bottom 16 Fish"
-  ) |> 
-  tab_spanner(
-    label = md("Mann-Whitney U"),
-    columns = c(`Mann-Whitney U p`, `W statistic`)
-  ) |> 
-  cols_label(
-    `Mann-Whitney U p` = md("*p*"),
-    `W statistic` = "W"
-  ) |> 
-    fmt_number(
-    columns = everything(),
-    decimals = 1
-  ) |> 
-  sub_values(
-    columns = `Mann-Whitney U p`,
-    fn = \(x) x < .001, replacement = "<0.001"
-  )
-
-non_parametric_table
-
-```
 
 ### 50/50 split
 
@@ -808,26 +831,26 @@ fifty_fifty_low <- fifty_fifty |>
   filter(group == "low")
 
 fifty_fifty_low_deficient_gametes <- fifty_fifty |> 
-  filter(group == "low" & deficient_conc) |> 
+  filter(group == "low" & deficient_conc == "deficient") |> 
   summarise(total = sum(est_fecund_n)) |> 
   pull(total) |> 
   comma()
 
 fifty_fifty_low_replete_gametes <- fifty_fifty |> 
-  filter(group == "low" & !deficient_conc) |> 
+  filter(group == "low" & deficient_conc == "replete") |> 
   summarise(total = sum(est_fecund_n)) |> 
   pull(total) |> 
   comma()
 
 fifty_fifty_high_replete_gametes <- fifty_fifty |> 
-  filter(group == "high" & !deficient_conc) |> 
+  filter(group == "high" & deficient_conc == "replete") |> 
   summarise(total = sum(est_fecund_n)) |> 
   pull(total) |> 
   comma()
 
 # Get deficent females low group
 fifty_fifty_low_deficient <- fifty_fifty |> 
-  filter(group == "low" & deficient_conc)
+  filter(group == "low" & deficient_conc == "deficient")
 
 fifty_fifty_low_deficient_females <- fifty_fifty_low_deficient |> 
   pull(fish_id)
@@ -836,7 +859,7 @@ fmt_fifty_fifty_low_deficient_ids <- combine_words(fifty_fifty_low_deficient_fem
 
 # Get replete females low group
 fifty_fifty_low_replete <- fifty_fifty |> 
-  filter(group == "low" & !deficient_conc)
+  filter(group == "low" & deficient_conc == "replete")
 
 fifty_fifty_low_replete_females <- fifty_fifty_low_replete |> 
   pull(fish_id)
@@ -847,7 +870,7 @@ fmt_fifty_fifty_low_replete_ids <- combine_words(fifty_fifty_low_replete_females
 
 
 fifty_fifty_high_replete <- fifty_fifty |> 
-  filter(group == "high" & !deficient_conc) 
+  filter(group == "high" & deficient_conc == "replete") 
 
 fifty_fifty_high_replete_females <- fifty_fifty_high_replete |> 
   pull(fish_id)
@@ -1063,20 +1086,20 @@ five_nmol_summary_table
 total_gametes_five_nmol <- round(sum(five_nmol$est_fecund_n), 0)
 
 five_nmol_deficient_gametes <- five_nmol |> 
-  filter(group == "deficient" & deficient_conc) |> 
+  filter(group == "deficient") |> 
   summarise(total = sum(est_fecund_n)) |> 
   pull(total) |> 
   comma()
 
 five_nmol_replete_gametes <- five_nmol |> 
-  filter(group == "replete" & !deficient_conc) |> 
+  filter(group == "replete") |> 
   summarise(total = sum(est_fecund_n)) |> 
   pull(total) |> 
   comma()
 
 # Get deficent females 
 five_nmol_deficient <- five_nmol |> 
-  filter(group == "deficient" & deficient_conc)
+  filter(group == "deficient")
 
 five_nmol_deficient_females <- five_nmol_deficient |> 
   pull(fish_id)
@@ -1085,7 +1108,7 @@ fmt_five_nmol_deficient_ids <- combine_words(five_nmol_deficient_females)
 
 # Get replete females group
 five_nmol_replete <- five_nmol |> 
-  filter(group == "replete" & !deficient_conc) 
+  filter(group == "replete") 
 
 five_nmol_replete_females <- five_nmol_replete |> 
   pull(fish_id)
@@ -1195,17 +1218,523 @@ The replete females in this grouping are:
 ## Andrew Creek Stock Thiamine Concentrations
 
 ![Andrew Creek stock Chinook salmon thiamine concentrations. The dashed red line indicates 5 nmol T/g, the threshold for deficient eggs.](output/plots/andrew_creek_thiamine_conc_yearly.png)
+Looks to be a decreasing trend over the years, though sample size is limited
+before 2024.
+
+## Correlation Matrix
+
+```{r}
+#| label: correlation-matrix
+
+dipac25_trim_numeric <- dipac25_trim |> 
+  select(
+    `mid-eye-fork-length`,
+    avg_egg_mass_g,
+    est_fecund_n,
+    nmolT_g,
+    nmolT_egg,
+    deficient_conc
+  )
+
+# Correlation alpha
+cor_alpha <- 0.05
+
+# Overall correlation matrix
+dipac25_overall_cors <- dipac25_trim_numeric |> 
+  select(-deficient_conc) |> 
+  cor_mat() |> 
+  cor_gather() |> 
+  mutate(group = "overall")
+
+# Correlation matrix for replete group
+
+dipac25_replete_cors <- dipac25_trim_numeric |> 
+  filter(deficient_conc == "replete") |> 
+  select(-deficient_conc) |> 
+  cor_mat() |> 
+  cor_gather() |>
+  mutate(group = "replete")
+
+# Correlation matrix for deficient group
+
+dipac25_deficient_cors <- dipac25_trim_numeric |> 
+  filter(deficient_conc == "deficient") |> 
+  select(-deficient_conc) |> 
+  cor_mat() |> 
+  cor_gather() |>
+  mutate(group= "deficient")
+  
+# Combine all corr tables
+
+main_cors <- bind_rows(
+  dipac25_overall_cors, 
+  dipac25_replete_cors, 
+  dipac25_deficient_cors
+  ) |> 
+  # remove duplicate pairs (A vs B is same as B vs A)
+  rowwise() |> 
+  mutate(pair_id = paste(sort(c(var1, var2)), collapse = "_")) |> 
+  ungroup() |> 
+  distinct(pair_id, group, .keep_all = TRUE) |> 
+  pivot_wider(
+    id_cols = c(var1, var2),
+    names_from = group,
+    values_from = c(cor, p)
+  ) |> 
+  filter(!(cor_overall == 1 & cor_replete == 1 & cor_deficient == 1)) |> 
+  filter(p_overall < cor_alpha | p_replete < cor_alpha | p_deficient < cor_alpha)
+
+# Correlation plot
+
+ggpairs(dipac25_trim,
+        columns = c(2,3,6,7,9),
+        aes(color = deficient_conc,
+            fill = deficient_conc,
+            alpha = 0.5)) +
+  scale_color_discrete(type = my_palette) +
+  scale_fill_discrete(type = my_palette)
+
+
+```
+
+```{r}
+#| label: correlation-results
+#| results: asis
+#| echo: false
+
+
+p_formatter <- label_pvalue(accuracy = .001, add_p = TRUE)
+
+cat("Correlations of interest were found between:\n")
+
+pwalk(main_cors, function(var1, var2, 
+                          cor_overall, p_overall,
+                          cor_replete, p_replete,
+                          cor_deficient, p_deficient) {
+  
+  cat(glue("\n\n* **{var1}** and **{var2}**"))
+  
+  if (!is.na(p_overall) && p_overall < cor_alpha) {
+    cat(glue(
+      "\n\n    + Overall *r* = {round(cor_overall, 2)},
+      {p_formatter(p_overall)}",
+      .trim = FALSE
+    ))
+  } else {
+    cat(glue(
+      "\n\n    + Overall correlation was not significant.",
+      .trim = FALSE
+    ))
+  }
+  
+  if (!is.na(p_replete) && p_replete < cor_alpha) {
+    cat(glue(
+      "\n\n    + Replete group *r* = {round(cor_replete, 2)},
+      {p_formatter(p_replete)}",
+      .trim = FALSE
+      ))
+  } else {
+    cat("\n\n    + Not significant for the replete group.")
+  }
+  
+
+  if (!is.na(p_deficient) && p_deficient < cor_alpha) {
+    cat(glue(
+      "\n\n    + Deficient group *r* = {round(cor_deficient, 2)},
+      {p_formatter(p_deficient)}",
+      .trim = FALSE
+      ))
+  } else {
+    cat("\n\n    + Not significant for the deficient group.")
+  }
+})
+
+```
+
 
 ## Linear Models
- 
-```{r}
-#| label: total-egg-mass-vs-conc
 
-ggplot(data = dipac25_bkd_trim, aes(x = nmolT_g, y = total_egg_mass_g)) +
+Investigating linear regression of different variables.
+
+### Fecundity as a function of egg thiamine concentration
+
+```{r}
+#| label: est-fecund-vs-conc
+#| fig-cap: "There was no significant linear correlation found between egg thiamine (nmol/g) and estimated fecundity."
+
+ggplot(data = dipac25, aes(x = nmolT_g, y = est_fecund_n)) +
   geom_point() +
-  stat_poly_line() +
   stat_poly_eq(use_label(c("eq", "r2", "p")))
 
 
 ```
 
+### Fecundity as a function of mid-eye-fork-length 
+
+```{r}
+#| label: est-fecund-vs-mefl
+#| fig-cap: "There was a significant linear correlation found between egg thiamine (nmol/g) and estimated fecundity."
+
+ggplot(data = dipac25_trim, aes(x = `mid-eye-fork-length`, y = est_fecund_n)) +
+  geom_point() +
+  stat_poly_line() +
+  stat_poly_eq(use_label(c("eq", "r2", "p")),
+               small.p = TRUE,
+               coef.digits = 5)
+
+
+```
+
+### Total egg thiamine (nmol/egg) as a function of mid-eye-fork-length 
+
+```{r}
+#| label: nmolTegg-vs-mefl-overall
+#| fig-cap: "There was no significant overall linear correlation found between total egg thiamine (nmol/egg) and mid-eye-fork-length, but it's pretty close."
+
+ggplot(data = dipac25_trim, aes(x = `mid-eye-fork-length`, y = nmolT_egg,
+                                color = deficient_conc)) +
+  geom_point() +
+  #stat_poly_line(color = "black") +
+  stat_poly_eq(use_label(c("eq", "r2", "p")),
+               small.p = TRUE,
+               coef.digits = 3,
+               color = "black") + 
+  guides(color = "none") +
+  scale_color_discrete(type = my_palette)
+
+```
+
+```{r}
+#| label: nmolTegg-vs-mefl-grouped
+#| fig-cap: "However, when grouped by thiamine status (deficient or replete; determined by egg concentration), there is a significant linear correlation found between total egg thiamine (nmol/egg) and mid-eye-fork-length."
+
+ggplot(data = dipac25_trim, aes(x = `mid-eye-fork-length`, y = nmolT_egg,
+                                color = deficient_conc)) +
+  geom_point(size = 2) +
+  stat_poly_line() +
+  stat_poly_eq(use_label("eq", "r2", "p"),
+               small.p = TRUE,
+               coef.digits = 3) +
+  #geom_text(aes(label = fish_id), vjust = "top", hjust = "right") +
+  scale_color_discrete(type = my_palette) +
+  theme(
+    legend.position = "bottom"
+  )
+
+```
+
+Here I am trying out a purely theoretical egg status grouping. Taking the bottom
+25% and the top 75% of nmol thiamine/egg values and grouping them.
+
+```{r}
+#| label: nmolTegg-vs-mefl-trial-group
+#| fig-cap: "Theoretical grouping by total egg thiamine (top 75% vs. bottom 25%). There are still significant linear correlations found between total egg thiamine (nmol/egg) and mid-eye-fork-length, but they are slightly weaker than with the established 5 nmol T/g grouping."
+
+ggplot(data = dipac25_trim, aes(x = `mid-eye-fork-length`, y = nmolT_egg,
+                                color = nmol_egg_status)) +
+  geom_point(size = 2) +
+  stat_poly_line() +
+  stat_poly_eq(use_label("eq", "r2", "p"),
+               small.p = TRUE,
+               coef.digits = 3) +
+  #geom_text(aes(label = fish_id), vjust = "top", hjust = "right") +
+  scale_color_discrete(type = my_palette) +
+  theme(
+    legend.position = "bottom"
+  )
+
+```
+
+With this theoretical grouping the fits are worse than just using the 
+5 nmol T/g grouping.
+
+
+## Egg Thiamine Concentration vs. Content Exploration
+
+* Egg thiamine content ($T$), or the total amount of thiamine in an egg (nmol)
+* Egg thiamine concentration ($C$), or the total amount of thiamine per unit of mass (nmol/g)
+* Average egg mass ($M$), the weight of an egg (g)
+
+These variables are directly related:
+
+$$T = C \times M $$
+or:
+
+$$ C = \frac{T}{M} $$
+
+So when we model total egg thiamine as a function of egg thiamine concentration
+without accounting for mass, the relationship looks noisy if there is any
+variation in egg mass:
+
+
+```{r}
+#| label: content-concentration-overall
+
+ggplot(dipac25_trim, aes(x = nmolT_g, y = nmolT_egg)) +
+  geom_point(alpha = 0.7) +
+  stat_poly_eq(use_label(c("eq", "r2", "p")),
+               small.p = TRUE) +
+  stat_poly_line(se = FALSE) +
+  labs(
+    x = "Egg Thiamine Concentration (nmol/g)",
+    y = "Total Egg Thiamine (nmol)"
+  ) +
+  scale_color_discrete(type = my_palette) +
+  scale_x_continuous(limits = c(0, 12), 
+                     breaks = seq(0, 12, 2),
+                     expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 4),
+                     breaks = seq(0, 4, 1),
+                     expand = c(0, 0))
+
+```
+
+It's a good fit, but it should be a perfect fit because total egg thiamine
+is calculated **using** egg thiamine concentration. It's not a perfect fit
+because we have not accounted for mass. We can explore this futher by
+breaking the eggs out into quantiles by their egg masses, when there is less
+variation in egg mass, the fit improves:
+
+
+```{r}
+#| label: content-concentration-quartiles
+
+# Break eggs into size classes based on quartiles
+dipac25_size_class <- dipac25_trim |> 
+  mutate(
+    mass_quartile = factor(ntile(avg_egg_mass_g, 4),
+                           labels = c("Q1", "Q2", "Q3", "Q4"))
+  )
+
+ggplot(dipac25_size_class, aes(x = nmolT_g, y = nmolT_egg, color = mass_quartile)) +
+  geom_point(alpha = 0.7) +
+  stat_poly_eq(use_label(c("eq", "r2", "p")),
+               small.p = TRUE) +
+  stat_poly_line(se = FALSE) +
+  labs(
+    x = "Egg Thiamine Concentration (nmol/g)",
+    y = "Total Egg Thiamine (nmol)",
+    color = "Mass Quartile"
+  ) +
+  scale_color_discrete(type = my_palette) +
+  scale_x_continuous(limits = c(0, 12), 
+                     breaks = seq(0, 12, 2),
+                     expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 4),
+                     breaks = seq(0, 4, 1),
+                     expand = c(0, 0))
+
+# The ':' tells R to only use the interaction term between the two variables
+formal_model <- lm(nmolT_egg ~ nmolT_g:avg_egg_mass_g, data = dipac25_trim)
+summary(formal_model)
+
+```
+
+Each fit is better than the overall fit, but still not perfect. We've decreased
+the variation in egg mass by grouping similarly sized eggs together, but we
+haven't accounted for egg mass in the model itself.
+
+What we've been fitting:
+
+$$ 
+T \sim C 
+$$
+What we need to fit:
+
+$$
+T \sim C \times M
+$$
+When we do this, we get the perfect fit we expect:
+
+```{r}
+#| label: content-concentration-overall-interaction
+
+dipac25_trim$interaction <- dipac25_trim$avg_egg_mass_g * dipac25_trim$nmolT_g
+
+ggplot(dipac25_trim, aes(x = interaction, y = nmolT_egg)) +
+  geom_point(alpha = 0.7) +
+  stat_poly_eq(use_label(c("eq", "r2", "p")),
+               small.p = TRUE) +
+  stat_poly_line(se = FALSE) +
+  labs(
+    x = "Egg Thiamine Concentration (nmol/g) x Average Egg Mass (g)",
+    y = "Total Egg Thiamine (nmol)"
+  ) +
+  scale_color_discrete(type = my_palette)
+  #scale_x_continuous(limits = c(0, 12), 
+  #                   breaks = seq(0, 12, 2),
+  #                   expand = c(0, 0)) +
+  #scale_y_continuous(limits = c(0, 4),
+  #                   breaks = seq(0, 4, 1),
+  #                   expand = c(0, 0))
+
+```
+
+
+
+
+```{r}
+#| label: scratch
+#| include: false
+
+top_bottom_16 |> 
+  group_by(group) |> 
+  summarise(
+    sum_gametes = sum(est_fecund_n),
+    gametes_80perc = round(sum_gametes * 0.8, 0),
+    drew_est = round(sum(est_pre_hardened_egg_mass_g / avg_egg_mass_g, 0)),
+    drew_est_80perc = round(drew_est * 0.8)
+  )
+
+
+dipac25_bkd_trim$total_thiamine_mass <- dipac25_bkd_trim$total_egg_mass_g * dipac25_bkd_trim$nmolT_egg
+
+
+summary(top_bottom_16$total_thiamine )
+
+ggplot(data = dipac25_bkd_trim, aes(x = deficient_conc, y = total_thiamine_mass)) +
+  geom_violin(aes(fill = deficient_conc)) +
+  geom_jitter() +
+  scale_fill_discrete(type = my_palette)
+
+tidy(wilcox.test(dipac25_bkd_trim[["total_thiamine_mass"]] ~ dipac25_bkd_trim$deficient_conc, data = dipac25_bkd_trim))
+
+
+```
+
+
+```{r}
+#| label: flexmix
+#| include: false
+
+# A. Split the data into your pre-defined groups
+replete_data <- dipac25_trim %>% filter(deficient_conc == "replete")
+deficient_data <- dipac25_trim %>% filter(deficient_conc == "deficient")
+
+# B. Fit a separate linear model (lm) to each group
+model_replete <- lm(nmolT_egg ~ `mid-eye-fork-length`, data = replete_data)
+model_deficient <- lm(nmolT_egg ~ `mid-eye-fork-length`, data = deficient_data)
+
+# C. Calculate the combined log-likelihood and number of parameters
+# Each lm() has 3 parameters: intercept, slope, and residual variance (sigma)
+total_logLik <- logLik(model_replete) + logLik(model_deficient)
+total_parameters <- (length(coef(model_replete)) + 1) + (length(coef(model_deficient)) + 1)
+
+# D. Manually calculate the combined AIC using the formula: AIC = -2*logLik + 2*k
+aic_predefined <- -2 * as.numeric(total_logLik) + 2 * total_parameters
+print(paste("Pre-defined Groups AIC:", round(aic_predefined, 2)))
+
+
+model_warm_start <- flexmix(nmolT_egg ~ `mid-eye-fork-length`,
+                            data = dipac25_trim,
+                            k = 2,
+                            cluster = dipac25_trim$deficient_conc)
+
+summary(model_warm_start)
+
+parameters(model_warm_start)
+
+table(dipac25_trim$deficient_conc, clusters(model_warm_start))
+
+dipac25_flex <- dipac25_trim |> 
+  mutate(cluster = as.factor(clusters(model_warm_start)))
+
+ggplot(data = dipac25_flex, aes(x = `mid-eye-fork-length`, y = nmolT_egg,
+                                color = cluster)) +
+  geom_point() +
+  stat_poly_line() +
+  stat_poly_eq(use_label(c("eq", "r2", "p")),
+               small.p = TRUE,
+               coef.digits = 3,
+               ) + 
+  guides(color = "none") +
+  scale_color_discrete(type = my_palette)
+
+```
+
+```{r}
+#| label: mclust
+#| include: false
+
+mclust_model <- Mclust(dipac25_trim$nmolT_egg)
+
+summary(mclust_model)
+# Plot the density to see the component distributions
+plot(mclust_model, what = "density", main = "Mixture Model for Total Egg Thiamine")
+
+# Run the bootstrap LRT
+# This can take a few minutes
+lrt_test <- mclustBootstrapLRT(dipac25_trim$nmolT_egg, modelName = "E")
+
+# Print the results
+print(lrt_test)
+
+```
+
+```{r}
+#| label: other-clustering
+#| include: false
+
+data_for_clustering <- dipac25_trim %>%
+  select(where(is.numeric)) |> 
+  select(-c(total_egg_mass_g, est_pre_hardened_egg_mass_g, est_fecund_n,
+            `mid-eye-fork-length`, nmolT_g))
+
+scaled_data <- scale(data_for_clustering)
+
+# Hierarchical Clustering ------------------------------------------------------
+
+dist_matrix <- dist(scaled_data, method = "euclidean")
+
+hierarchical_model <- hclust(dist_matrix, method = "ward.D2")
+
+plot(hierarchical_model, cex = 0.6, main = "Hierarchical Clustering Dendrogram")
+rect.hclust(hierarchical_model, k = 2, border = "red") # Draw a box around 2 clusters
+
+# Cut the tree to get 2 clusters
+hierarchical_clusters <- cutree(hierarchical_model, k = 2)
+
+
+# K-Means Clustering -----------------------------------------------------------
+# Create the elbow plot
+fviz_nbclust(scaled_data, kmeans, method = "wss")
+
+set.seed(123) # for reproducibility
+
+# Perform k-means clustering with k=2
+kmeans_model <- kmeans(scaled_data, centers = 2, nstart = 25)
+
+# Get the cluster assignments
+kmeans_clusters <- kmeans_model$cluster
+
+
+# Adding back in ---------------------------------------------------------------
+
+dipac_other_clusters <- dipac25_trim |> 
+  mutate(
+    h_cluster = as.factor(hierarchical_clusters),
+    k_cluster = as.factor(kmeans_clusters)
+  )
+
+```
+
+```{r}
+#| label: nmolTegg-vs-mefl-hclust
+#| include: false
+
+ggplot(data = dipac_other_clusters, aes(
+  x = `mid-eye-fork-length`,
+  y = nmolT_g,
+  color = k_cluster)) +
+  geom_point(size = 2) +
+  stat_poly_line() +
+  stat_poly_eq(use_label("eq", "r2", "p"),
+               small.p = TRUE,
+               coef.digits = 3) +
+  #geom_text(aes(label = fish_id), vjust = "top", hjust = "right") +
+  scale_color_discrete(type = my_palette) +
+  theme(
+    legend.position = "bottom"
+  )
+
+```
