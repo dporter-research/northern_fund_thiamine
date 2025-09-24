@@ -1,0 +1,73 @@
+```{r}
+#| label: setup
+#| output: false
+
+# Load libraries
+library(tidyverse)
+library(patchwork)
+library(knitr)
+library(ggpmisc)
+library(here)
+library(stringr) 
+library(ggridges)
+library(scales)
+library(broom)
+library(gt)
+library(corrplot)
+library(GGally)
+library(corrr)
+library(rstatix)
+library(glue)
+library(flexmix)
+library(mclust)
+library(factoextra)
+
+
+# ggplot theme set
+theme_set(theme_bw())
+
+# color palette
+my_palette <- c("#1F77B4FF", "#FF7F0EFF", "#2CA02CFF", "#D62728FF", "#9467BDFF",
+                "#8C564BFF", "#E377C2FF", "#7F7F7FFF", "#BCBD22FF", "#17BECFFF")
+
+```
+
+```{r}
+#| label: load-data
+#| output: false
+
+dipac25 <- read_rds(here("data/processed/dipac_females.rds"))
+
+dipac25_trim <- dipac25 |> 
+  select(fish_id, `mid-eye-fork-length`, avg_egg_mass_g, total_egg_mass_g,
+         est_pre_hardened_egg_mass_g, est_fecund_n, nmolT_g, deficient_conc, 
+         nmolT_egg, deficient_totalT) |> 
+  mutate(
+    drew_est_fecund = avg_egg_mass_g * est_pre_hardened_egg_mass_g,
+    deficient_conc = factor(if_else(deficient_conc, "deficient", "replete", NA)),
+    deficient_totalT = factor(if_else(deficient_totalT, "deficient", "replete", NA))
+    )
+
+# I want to check out nmol thiamine/egg but I don't have an established
+# criteria for deficiency with this metric. I am going to take the bottom
+# 25% of eggs and group them, and the top 75% and group them for exploration
+
+nmol_egg_quant <- quantile(dipac25_trim$nmolT_egg)
+
+dipac25_trim <- dipac25_trim |> 
+  mutate(nmol_egg_status = factor(if_else(nmolT_egg > nmol_egg_quant[2][[1]],
+                                   "top75", "bottom25", NA)))
+
+# These fish tested positive for BKD and cannot be included in the study
+bkd_fish <- c("f13", "f34")
+
+dipac25_bkd_trim <- dipac25_trim |> 
+  filter(!(fish_id %in% bkd_fish))
+
+# saveRDS(dipac25_bkd_trim,
+#         file = here("data/processed/dipac25_bkd_trim.rds"))
+# 
+# write_csv(dipac25_bkd_trim,
+#         file = here("data/processed/dipac25_bkd_trim.csv"))
+
+```

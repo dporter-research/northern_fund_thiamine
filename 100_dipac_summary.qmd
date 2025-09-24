@@ -1,0 +1,68 @@
+---
+title: "Chinook Egg Thiamine, Macaulay 2025, DIPAC Report"
+author: "Drew Porter"
+date-modified: today
+date: todaym
+format: pdf
+fig-width: 7
+fig-height: 5
+fig-dpi: 300
+lightbox: true
+editor: source
+toc: false
+output-file: "dipac_report"
+editor_options: 
+  chunk_output_type: console
+echo: false
+mainfont: Arial
+---
+
+## Introduction
+
+This report is an analysis of Chinook salmon egg thiamine. Eggs were collected
+from returning Chinook salmon at DIPAC's Macaulay Hatchery in Juneau, AK on
+2025-08-15.
+
+For this analysis, individuals with eggs containing less than 5 nmol thiamine
+per gram are considered to be "thiamine deficient", this is the consensus literature
+value for deficient eggs. 
+
+### Glossary of Variables
+
+`mid-eye-fork-length`
+: The length in millimeters for each fish, taken from the middle of the eye 
+to the fork in the caudal fin.
+
+`avg_egg_mass_g`
+: The average mass of the eggs sampled for thiamine for each fish, measured in grams. 
+Determined by dividing the total mass of the eggs sampled by the number of eggs sampled 
+for thiamine analysis.
+
+`total_egg_mass_g`
+: The total mass of eggs, in grams, for each fish, measured at DIPAC after 
+fertilization and water hardening.
+
+`est_fecund_n`
+: The total estimated fecundity, representing the total number of eggs produced 
+by each female. Provided by Arthur Hamlett, DIPAC. 
+
+`nmolT_g`
+: Nanomoles of thiamine per gram of egg.
+
+`nmolT_egg`
+: Nanomoles of thiamine per egg.
+
+{{< include 02_histograms.qmd >}}
+
+Of the 58 females we measured eggs from (2 BKD positive fish removed), 16 (27.6 %)
+fall below the established offspring mortality benchmark (5.0 nmol T/g). We have
+enough individuals classified as "deficient" that we should be able to determine
+if this 5.0 nmol T/g benchmark is accurate for Andrew Creek Chinook salmon.
+
+{{< pagebreak >}}
+
+## Andrew Creek Stock Thiamine Concentrations
+
+![Andrew Creek stock Chinook salmon thiamine concentrations. The dashed red line indicates 5 nmol T/g, the threshold for deficient eggs.](output/plots/andrew_creek_thiamine_conc_yearly.png)
+Looks to be a decreasing trend over the years, though sample size is limited
+before 2024.

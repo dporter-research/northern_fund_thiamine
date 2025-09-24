@@ -19,7 +19,7 @@ editor_options:
 ## Introduction
 
 This report is an analysis of Chinook salmon egg thiamine. Eggs were collected
-from returning Chinook salmon at DIPAC's Macauley Hatchery in Juneau, AK on
+from returning Chinook salmon at DIPAC's Macaulay Hatchery in Juneau, AK on
 2025-08-15.
 
 For this analysis, individuals with eggs containing less than 5 nmol thiamine
