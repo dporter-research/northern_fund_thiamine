@@ -1,0 +1,127 @@
+---
+title: "02_power_analyses"
+author: "Drew Porter"
+format: html
+editor: visual
+date-modified: today
+fig-width: 7
+fig-height: 5
+fig-dpi: 300
+lightbox: true
+toc: true
+toc-depth: 4
+code-fold: true
+output-file: "02-power-analyses-output"
+bibliography: references.bib
+---
+
+## Power Analyses
+
+I'm trying to determine the sample sizes required for our experiments. The experiments I can think of are:
+
+1.  Survival
+
+2.  Growth rate
+
+3.  Yolk sac absorption rate
+
+4.  Early life swim performance
+
+### Survival
+
+***H***~**0**~: Egg thiamine concentration has no effect on survival to ponding in a hatchery setting.
+
+***H***~**A**~: Increasing egg thiamine concentration increases survival to ponding in a hatchery setting.
+
+**Statistical method**: Logistic regression (GLM with binomial family**)**
+
+**Effect size**:
+
+**Sources**:
+
+```{r}
+library(tidyverse)
+library(simr)
+library(ggplot2)
+library(readr)
+library(here)
+
+dipac_data <- read_rds("data/processed/dipac25_bkd_trim.rds")
+
+# Model parameters from Mantua (2025)
+intercept <- -1.5898
+
+slope_thiamine <- log(1.80)
+
+actual_thiamine_values <- dipac_data$nmolT_g
+
+fixed_effects <- c(intercept, slope_thiamine)
+
+example_data <- data.frame(
+  thiamine = actual_thiamine_values, # Use your loaded data here
+  # Add a dummy survival outcome (simr will overwrite this)
+  survival = rbinom(58, size = 1, prob = 0.5)
+)
+
+model_glm <- glm(
+  survival ~ thiamine,
+  family = binomial(link = "logit"),
+  data = example_data
+)
+
+# --- CORRECTED STEP: Use extend() to add the desired fixed effects ---
+# This tells simr to use your defined coefficients for the simulation
+extended_model <- extend(model_glm, along = "thiamine", n = 58) # Specify the predictor and sample size
+fixef(extended_model) <- fixed_effects # Now apply the fixed effects to the *extended* object
+
+thiamine_values <- seq(0, 10, by = 0.1)
+log_odds <- intercept + slope_thiamine * thiamine_values
+probability_survival <- 1 / (1 + exp(-log_odds))
+plot_data <- data.frame(
+  Thiamine = thiamine_values,
+  SurvivalProbability = probability_survival
+)
+ec50_point <- data.frame(Thiamine = 2.7, SurvivalProbability = 0.50)
+ec95_point <- data.frame(Thiamine = 7.7, SurvivalProbability = 0.95)
+
+ggplot(plot_data, aes(x = Thiamine, y = SurvivalProbability)) +
+  geom_line(color = "blue", linewidth = 1) + # Plot the calculated curve
+  geom_point(data = ec50_point, color = "red", size = 3) + # Add EC50 point
+  geom_text(data = ec50_point, label = "EC50 (2.7, 0.50)", vjust = -1, hjust=0.2, color = "red") +
+  geom_point(data = ec95_point, color = "red", size = 3) + # Add EC95 point
+  geom_text(data = ec95_point, label = "EC95 (7.7, 0.95)", vjust = -1, hjust=0.8, color = "red") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) + # Format y-axis as percentage
+  labs(
+    title = "Recreated Logistic Model from Mantua et al. (2025)",
+    x = "Egg Thiamine Concentration (nmol/g)",
+    y = "Predicted Fry Survival (%)"
+  ) +
+  theme_minimal() # Use a clean theme
+
+```
+
+```{r}
+
+group_counts <- dipac_data |> 
+  summarise(
+    n_impacted = sum(nmolT_g < 5.9),
+    n_unimpacted = sum(nmolT_g > 5.9)
+  )
+
+
+group_counts
+```
+
+[@fisher1998]
+
+*H*~0~:
+
+*H*~A~:
+
+*H*~0~:
+
+*H*~A~:
+
+*H*~0~:
+
+*H*~A~:
