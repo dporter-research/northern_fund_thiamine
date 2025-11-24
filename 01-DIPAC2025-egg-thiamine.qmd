@@ -8,6 +8,8 @@ fig-height: 5
 fig-dpi: 300
 lightbox: true
 editor: source
+  markdown: 
+    wrap: 72
 toc: true
 toc-depth: 4
 code-fold: true
@@ -18,50 +20,43 @@ editor_options:
 
 ## Introduction
 
-This report is an analysis of Chinook salmon egg thiamine. Eggs were collected
-from returning Chinook salmon at DIPAC's Macaulay Hatchery in Juneau, AK on
-2025-08-15.
+This report is an analysis of Chinook salmon egg thiamine. Eggs were collected from returning Chinook salmon at DIPAC's Macaulay Hatchery in Juneau, AK on 2025-08-15.
 
-For this analysis, individuals with eggs containing less than 5 nmol thiamine
-per gram are considered to be "thiamine deficient", this is the consensus literature
-value for deficient eggs. I am also interested in looking at thiamine on a per egg basis,
-I've classified individuals with less than 1 nmol thiamine per egg as deficient, 
-this is not an established criteria.
+For this analysis, individuals with eggs containing less than 5 nmol thiamine per gram are considered to be "thiamine deficient", this is the consensus literature value for deficient eggs. I am also interested in looking at thiamine on a per egg basis, I've classified individuals with less than 1 nmol thiamine per egg as deficient, this is not an established criteria.
 
 ### Glossary of Variables
 
 `fish_id`
-: A unique identifier for each fish
+
+:   A unique identifier for each fish
 
 `mid-eye-fork-length`
-: The length in millimeters for each fish, taken from the middle of the eye 
-to the fork in the caudal fin.
+
+:   The length in millimeters for each fish, taken from the middle of the eye to the fork in the caudal fin.
 
 `avg_egg_mass_g`
-: The average mass of an egg for each fish, measured in grams. Determined by 
-dividing the total mass of eggs by the number of eggs measured for thiamine analysis.
+
+:   The average mass of an egg for each fish, measured in grams. Determined by dividing the total mass of eggs by the number of eggs measured for thiamine analysis.
 
 `total_egg_mass_g`
-: The total mass of eggs, in grams, for each fish, measured at DIPAC after 
-fertilization and water hardening.
+
+:   The total mass of eggs, in grams, for each fish, measured at DIPAC after fertilization and water hardening.
 
 `est_pre_hardened_egg_mass_g`
-: The estimated total mass of eggs, in grams, for each fish. Calculated by reducing
-the total egg mass by 23%, which is the estimated increase in salmon egg weight
-after water hardening, fertilization is not expected to significantly increase
-egg weight (Fleming and Ng, 1987). I was using this to estimate fecundity
-before Arthur sent estimated egg counts, I am using his counts now.
+
+:   The estimated total mass of eggs, in grams, for each fish. Calculated by reducing the total egg mass by 23%, which is the estimated increase in salmon egg weight after water hardening, fertilization is not expected to significantly increase egg weight (Fleming and Ng, 1987). I was using this to estimate fecundity before Arthur sent estimated egg counts, I am using his counts now.
 
 `est_fecund_n`
-: The total estimated fecundity, representing the total number of eggs produced 
-by each female. Provided by Arthur Hamlett, DIPAC. 
+
+:   The total estimated fecundity, representing the total number of eggs produced by each female. Provided by Arthur Hamlett, DIPAC.
 
 `nmolT_g`
-: Nanomoles of thiamine per gram of egg.
+
+:   Nanomoles of thiamine per gram of egg.
 
 `nmolT_egg`
-: Nanomoles of thiamine per egg.
 
+:   Nanomoles of thiamine per egg.
 
 ## Analysis
 
@@ -88,6 +83,8 @@ library(glue)
 library(flexmix)
 library(mclust)
 library(factoextra)
+library(lme4)
+library(googlesheets4)
 
 
 # ggplot theme set
@@ -134,6 +131,7 @@ dipac25_bkd_trim <- dipac25_trim |>
 names(dipac25_trim)
 
 ```
+
 ### Histograms
 
 ```{r}
@@ -264,17 +262,14 @@ dipac25_bkd_trim |>
   )
 
 ```
-Of 58 fish, 16 are deficient (28%), what would it look like if we group the 16 
-lowest concentration fish for a deficient group, and the 16 highest concentration
-fish for a replete group?
+
+Of 58 fish, 16 are deficient (28%), what would it look like if we group the 16 lowest concentration fish for a deficient group, and the 16 highest concentration fish for a replete group?
 
 ## Grouping Ideas
 
 ### Lowest 16, Highest 16
 
-In this grouping, we would select all the thiamine deficient (<5 nmol T/g) fish
-for the low group, and the 16 fish with the highest egg thiamine concentrations
-for the high group.
+In this grouping, we would select all the thiamine deficient (\<5 nmol T/g) fish for the low group, and the 16 fish with the highest egg thiamine concentrations for the high group.
 
 #### Density Plots
 
@@ -671,17 +666,9 @@ fmt_top_bot_16_short_replete_fish_gametes <- combine_words(comma(round(
 
 This group would contain `{r} top_bot_16_deficient_n` fish in the deficient group and `{r} top_bot_16_replete_n` fish in the replete group. If gametes were split evenly per group and per fish that would be `{r} comma(90000/2)` gametes per group and `{r} comma(top_bot_16_even_split_gametes_per_fish_deficient)` gametes per fish.
 
-Of the deficient fish, 
-`{r} fmt_top_bot_16_short_deficient_fish`
-comes up short with
-`{r} fmt_top_bot_16_short_deficient_fish_gametes`
-estimated gametes.
+Of the deficient fish, `{r} fmt_top_bot_16_short_deficient_fish` comes up short with `{r} fmt_top_bot_16_short_deficient_fish_gametes` estimated gametes.
 
-Of the replete fish,
-`{r} fmt_top_bot_16_short_replete_fish`
-comes up short with
-`{r} fmt_top_bot_16_short_replete_fish_gametes`
-estimated gametes.
+Of the replete fish, `{r} fmt_top_bot_16_short_replete_fish` comes up short with `{r} fmt_top_bot_16_short_replete_fish_gametes` estimated gametes.
 
 The deficient females for this grouping are `{r} formatted_deficient_id_list`.
 
@@ -689,8 +676,7 @@ The replete females for this grouping are `{r} formatted_replete_id_list`.
 
 ### 50/50 split
 
-In this grouping, we would keep all `{r} length(dipac25_bkd_trim$fish_id)` fish 
-in the study and divide the low and high groups down the middle of egg thiamine concentrations (`{r} round(median(dipac25_bkd_trim$nmolT_g), 2)` nmol T/g).
+In this grouping, we would keep all `{r} length(dipac25_bkd_trim$fish_id)` fish in the study and divide the low and high groups down the middle of egg thiamine concentrations (`{r} round(median(dipac25_bkd_trim$nmolT_g), 2)` nmol T/g).
 
 #### Density Plots
 
@@ -916,38 +902,19 @@ fifty_fifty_even_split_gametes_per_fish_high <= fifty_fifty_high_replete$est_fec
 # All replete fish have enough gametes
 ```
 
-This grouping would contain 
-`{r} fifty_fifty_low_n` 
-fish in the "low" group; of those fish
-`{r} length(fifty_fifty_low_deficient_females)` 
-would be considered "deficient" in egg thiamine concentration, 
-`{r} length(fifty_fifty_low_replete_females)`
-would be considered "replete". The "high" group would contain 
-`{r} fifty_fifty_high_n` 
-"replete" fish.
+This grouping would contain `{r} fifty_fifty_low_n` fish in the "low" group; of those fish `{r} length(fifty_fifty_low_deficient_females)` would be considered "deficient" in egg thiamine concentration, `{r} length(fifty_fifty_low_replete_females)` would be considered "replete". The "high" group would contain `{r} fifty_fifty_high_n` "replete" fish.
 
-Our 90,000 fish allowance would include `{r} comma(90000/2)` "low" and
-`{r} comma(90000/2)` "high" gametes if we split the groups evenly, this works out
-to `{r} comma(90000 / length(fifty_fifty$fish_id))` gametes
-per fish.
+Our 90,000 fish allowance would include `{r} comma(90000/2)` "low" and `{r} comma(90000/2)` "high" gametes if we split the groups evenly, this works out to `{r} comma(90000 / length(fifty_fifty$fish_id))` gametes per fish.
 
-Of the low group, fish 
-`{r} fmt_fifty_fifty_short_low_fish`
-does not have enough estimated gametes 
-(`{r} fmt_fifty_fifty_short_low_fish_gametes`).
-All of the high group fish have enough estimated gametes.
+Of the low group, fish `{r} fmt_fifty_fifty_short_low_fish` does not have enough estimated gametes (`{r} fmt_fifty_fifty_short_low_fish_gametes`). All of the high group fish have enough estimated gametes.
 
-The deficient females in the "low" group for this grouping are 
-`{r} fmt_fifty_fifty_low_deficient_ids`. The replete females in the "low"
-group for this grouping are `{r} fmt_fifty_fifty_low_replete_ids`.
+The deficient females in the "low" group for this grouping are `{r} fmt_fifty_fifty_low_deficient_ids`. The replete females in the "low" group for this grouping are `{r} fmt_fifty_fifty_low_replete_ids`.
 
-The replete females in the "high" group for this grouping are 
-`{r} fmt_fifty_fifty_high_replete_ids`.
+The replete females in the "high" group for this grouping are `{r} fmt_fifty_fifty_high_replete_ids`.
 
 ### 5 nmol T/g split
 
-In this grouping, we would keep all `{r} length(dipac25_bkd_trim$fish_id)` fish 
-in the study and divide the deficient and replete groups at the 5 nmol T/g benchmark. This would result in an uneven split.
+In this grouping, we would keep all `{r} length(dipac25_bkd_trim$fish_id)` fish in the study and divide the deficient and replete groups at the 5 nmol T/g benchmark. This would result in an uneven split.
 
 #### Density Plots
 
@@ -1188,38 +1155,19 @@ five_nmol_prop_split_gametes_per_fish_replete <=
 # All replete fish have enough gametes
 ```
 
-This grouping would contain `{r} five_nmol_deficient_n` fish in the "deficient" group and `{r} five_nmol_replete_n` fish in the "replete" group. Proportionately
-that is `{r} round(five_nmol_deficient_prop * 100, 1)`% deficient fish and
-`{r} round(five_nmol_replete_prop * 100, 1)`% replete fish.
+This grouping would contain `{r} five_nmol_deficient_n` fish in the "deficient" group and `{r} five_nmol_replete_n` fish in the "replete" group. Proportionately that is `{r} round(five_nmol_deficient_prop * 100, 1)`% deficient fish and `{r} round(five_nmol_replete_prop * 100, 1)`% replete fish.
 
-If we wanted to have an even number of gametes per group (i.e., 
-`{r} comma(90000/2)` gametes), it would require 
-`{r} comma(five_nmol_even_split_gametes_per_fish_deficient)` gametes per
-deficient fish and
-`{r} comma(five_nmol_even_split_gametes_per_fish_replete)` gametes per
-replete fish. One deficient fish (`{r} fmt_five_nmol_short_deficient_fish`)
-is short of this many estimated gametes 
-(`{r} fmt_five_nmol_short_deficient_fish_gametes`). 
-This shortage could be covered by other deficient fish. All
-of the replete fish have enough gametes for this split.
+If we wanted to have an even number of gametes per group (i.e., `{r} comma(90000/2)` gametes), it would require `{r} comma(five_nmol_even_split_gametes_per_fish_deficient)` gametes per deficient fish and `{r} comma(five_nmol_even_split_gametes_per_fish_replete)` gametes per replete fish. One deficient fish (`{r} fmt_five_nmol_short_deficient_fish`) is short of this many estimated gametes (`{r} fmt_five_nmol_short_deficient_fish_gametes`). This shortage could be covered by other deficient fish. All of the replete fish have enough gametes for this split.
 
-If we wanted to have a proportional number of gametes for each group (i.e.,
-`{r} comma(five_nmol_prop_split_gametes_deficient)` gametes for the deficient group and `{r} comma(five_nmol_prop_split_gametes_replete)` gametes for the replete group), it would require 
-`{r} comma(five_nmol_prop_split_gametes_per_fish_deficient)` 
-per fish for each group. Again, fish
-`{r} fmt_five_nmol_short_prop_deficient_fish` from the deficient group comes up short (only `{r} fmt_five_nmol_short_prop_deficient_fish_gametes` estimated gametes). This shortage could be covered by other deficient females. For the replete group, all fish have enough estimated gametes.
+If we wanted to have a proportional number of gametes for each group (i.e., `{r} comma(five_nmol_prop_split_gametes_deficient)` gametes for the deficient group and `{r} comma(five_nmol_prop_split_gametes_replete)` gametes for the replete group), it would require `{r} comma(five_nmol_prop_split_gametes_per_fish_deficient)` per fish for each group. Again, fish `{r} fmt_five_nmol_short_prop_deficient_fish` from the deficient group comes up short (only `{r} fmt_five_nmol_short_prop_deficient_fish_gametes` estimated gametes). This shortage could be covered by other deficient females. For the replete group, all fish have enough estimated gametes.
 
-The deficient females in this grouping are: 
-`{r} fmt_five_nmol_deficient_ids`. 
+The deficient females in this grouping are: `{r} fmt_five_nmol_deficient_ids`.
 
-The replete females in this grouping are:
-`{r} fmt_five_nmol_replete_ids`.
+The replete females in this grouping are: `{r} fmt_five_nmol_replete_ids`.
 
 ## Andrew Creek Stock Thiamine Concentrations
 
-![Andrew Creek stock Chinook salmon thiamine concentrations. The dashed red line indicates 5 nmol T/g, the threshold for deficient eggs.](output/plots/andrew_creek_thiamine_conc_yearly.png)
-Looks to be a decreasing trend over the years, though sample size is limited
-before 2024.
+![Andrew Creek stock Chinook salmon thiamine concentrations. The dashed red line indicates 5 nmol T/g, the threshold for deficient eggs.](output/plots/andrew_creek_thiamine_conc_yearly.png) Looks to be a decreasing trend over the years, though sample size is limited before 2024.
 
 ## Correlation Matrix
 
@@ -1351,7 +1299,6 @@ pwalk(main_cors, function(var1, var2,
 
 ```
 
-
 ## Linear Models
 
 Investigating linear regression of different variables.
@@ -1369,7 +1316,7 @@ ggplot(data = dipac25, aes(x = nmolT_g, y = est_fecund_n)) +
 
 ```
 
-### Fecundity as a function of mid-eye-fork-length 
+### Fecundity as a function of mid-eye-fork-length
 
 ```{r}
 #| label: est-fecund-vs-mefl
@@ -1385,7 +1332,7 @@ ggplot(data = dipac25_trim, aes(x = `mid-eye-fork-length`, y = est_fecund_n)) +
 
 ```
 
-### Total egg thiamine (nmol/egg) as a function of mid-eye-fork-length 
+### Total egg thiamine (nmol/egg) as a function of mid-eye-fork-length
 
 ```{r}
 #| label: nmolTegg-vs-mefl-overall
@@ -1423,8 +1370,7 @@ ggplot(data = dipac25_trim, aes(x = `mid-eye-fork-length`, y = nmolT_egg,
 
 ```
 
-Here I am trying out a purely theoretical egg status grouping. Taking the bottom
-25% and the top 75% of nmol thiamine/egg values and grouping them.
+Here I am trying out a purely theoretical egg status grouping. Taking the bottom 25% and the top 75% of nmol thiamine/egg values and grouping them.
 
 ```{r}
 #| label: nmolTegg-vs-mefl-trial-group
@@ -1445,27 +1391,21 @@ ggplot(data = dipac25_trim, aes(x = `mid-eye-fork-length`, y = nmolT_egg,
 
 ```
 
-With this theoretical grouping the fits are worse than just using the 
-5 nmol T/g grouping.
-
+With this theoretical grouping the fits are worse than just using the 5 nmol T/g grouping.
 
 ## Egg Thiamine Concentration vs. Content Exploration
 
-* Egg thiamine content ($T$), or the total amount of thiamine in an egg (nmol)
-* Egg thiamine concentration ($C$), or the total amount of thiamine per unit of mass (nmol/g)
-* Average egg mass ($M$), the weight of an egg (g)
+-   Egg thiamine content ($T$), or the total amount of thiamine in an egg (nmol)
+-   Egg thiamine concentration ($C$), or the total amount of thiamine per unit of mass (nmol/g)
+-   Average egg mass ($M$), the weight of an egg (g)
 
 These variables are directly related:
 
-$$T = C \times M $$
-or:
+$$T = C \times M $$ or:
 
 $$ C = \frac{T}{M} $$
 
-So when we model total egg thiamine as a function of egg thiamine concentration
-without accounting for mass, the relationship looks noisy if there is any
-variation in egg mass:
-
+So when we model total egg thiamine as a function of egg thiamine concentration without accounting for mass, the relationship looks noisy if there is any variation in egg mass:
 
 ```{r}
 #| label: content-concentration-overall
@@ -1489,12 +1429,7 @@ ggplot(dipac25_trim, aes(x = nmolT_g, y = nmolT_egg)) +
 
 ```
 
-It's a good fit, but it should be a perfect fit because total egg thiamine
-is calculated **using** egg thiamine concentration. It's not a perfect fit
-because we have not accounted for mass. We can explore this futher by
-breaking the eggs out into quantiles by their egg masses, when there is less
-variation in egg mass, the fit improves:
-
+It's a good fit, but it should be a perfect fit because total egg thiamine is calculated **using** egg thiamine concentration. It's not a perfect fit because we have not accounted for mass. We can explore this futher by breaking the eggs out into quantiles by their egg masses, when there is less variation in egg mass, the fit improves:
 
 ```{r}
 #| label: content-concentration-quartiles
@@ -1530,21 +1465,17 @@ summary(formal_model)
 
 ```
 
-Each fit is better than the overall fit, but still not perfect. We've decreased
-the variation in egg mass by grouping similarly sized eggs together, but we
-haven't accounted for egg mass in the model itself.
+Each fit is better than the overall fit, but still not perfect. We've decreased the variation in egg mass by grouping similarly sized eggs together, but we haven't accounted for egg mass in the model itself.
 
 What we've been fitting:
 
 $$ 
 T \sim C 
-$$
-What we need to fit:
+$$ What we need to fit:
 
 $$
 T \sim C \times M
-$$
-When we do this, we get the perfect fit we expect:
+$$ When we do this, we get the perfect fit we expect:
 
 ```{r}
 #| label: content-concentration-overall-interaction
@@ -1569,9 +1500,6 @@ ggplot(dipac25_trim, aes(x = interaction, y = nmolT_egg)) +
   #                   expand = c(0, 0))
 
 ```
-
-
-
 
 ```{r}
 #| label: scratch
@@ -1601,7 +1529,6 @@ tidy(wilcox.test(dipac25_bkd_trim[["total_thiamine_mass"]] ~ dipac25_bkd_trim$de
 
 
 ```
-
 
 ```{r}
 #| label: flexmix
@@ -1739,7 +1666,6 @@ ggplot(data = dipac_other_clusters, aes(
 
 ```
 
-
 ```{r}
 #| label: groupings
 
@@ -1793,4 +1719,112 @@ ggplot() +
 
 write_csv(dipac25_bkd_trim, file = here("output/dipac_25_bkd_trim.csv"))
 
+```
+
+```{r}
+#| label: alevin-init-size
+
+
+alevin_init_sample_data_url <- "https://docs.google.com/spreadsheets/d/1USWhDAUBjClmPTshOR3Z_fBXyUgtNOcQHYwL3UTpEFE/edit?gid=1983306965#gid=1983306965"
+alevin_init_sample_sheet <- "alevin-hatch-sampling"
+
+alevin_init_sample_data <- read_sheet(alevin_init_sample_data_url,
+                                      sheet = alevin_init_sample_sheet)
+?pivot_longer
+
+alevin_init_samp_long <- alevin_init_sample_data |> 
+  pivot_longer(
+    cols = matches("[A-Za-z]_Fish[0-9]+"),
+    names_to = c(".value", "fish"),
+    names_sep = "_"
+  ) |> 
+  filter(
+    group != "duplicate"
+  ) |> 
+  mutate(
+    group = factor(group, levels = c("16_lowest", "middle", "16_highest"))
+  ) |> 
+  mutate(
+    id = factor(id)
+  )
+
+alevin_init_samp_means <- alevin_init_samp_long |> 
+  group_by(id, group) |> 
+  summarise(
+    mean_mass_g = mean(g),
+    sd_mass_g = sd(g),
+    mean_length_mm = mean(mm),
+    sd_length_mm = sd(mm)
+  )
+
+ggplot(data = alevin_init_samp_long, aes(y = g, x = fct_reorder(id, nmolT_g))) +
+  geom_violin() +
+  geom_jitter(aes(color = nmolT_g)) +
+  scale_color_continuous(palette = "viridis") +
+  facet_wrap(~group,
+             scales = "free_x",
+             ncol = 3)
+
+ggplot(data = alevin_init_samp_long, aes(y = mm, x = fct_reorder(id, nmolT_g))) +
+  geom_violin() +
+  geom_jitter(aes(color = nmolT_g)) +
+  scale_color_continuous(palette = "viridis") +
+  facet_wrap(~group,
+             scales = "free_x",
+             ncol = 3)
+
+ggplot(data = alevin_init_samp_means, aes(x = factor(group), y = mean_mass_g)) +
+  geom_violin() +
+  geom_jitter(data = alevin_init_samp_means,
+              aes(x = factor(group), y = mean_mass_g,
+                  color = id)) 
+
+ggplot(data = test) +
+  geom_violin(aes(x = factor(group), y = mm))
+
+str(alevin_init_sample_data)
+
+highest16 <- alevin_init_samp_long |> 
+  filter(
+    group == "16_highest"
+  )
+
+ggplot(highest16, aes(x = g, y = id)) +
+  geom_density_ridges(
+    aes(
+      point_color = id,
+      point_fill = id
+    ),
+    jittered_points = TRUE
+  )
+
+ggplot(alevin_init_samp_long) +
+  geom_histogram(aes(x = g), bins = 15, fill = "pink") +
+  geom_vline(xintercept = mean(alevin_init_samp_long$g)) +
+  geom_vline(xintercept = mean(alevin_init_samp_long$g) + sd(alevin_init_samp_long$g), color = "red") +
+geom_vline(xintercept = mean(alevin_init_samp_long$g) - sd(alevin_init_samp_long$g), color = "red")
+
+mean <- mean(alevin_init_samp_long$g)
+sd <- sd(alevin_init_samp_long$g)
+
+countA <- alevin_init_samp_long |> 
+  summarise(
+    count_1sd = sum(g > (mean-(2*sd)) & g < (mean+(2*sd))),
+    allcount = n()
+  )
+
+547/580
+
+test <- rnorm(1000, mean = mean, sd = sd)
+
+hist(test)
+
+```
+
+```{r}
+#| label: lmm
+
+alevin1_model <- lmer(g ~ nmolT_g + (1+nmolT_g|id), data = alevin_init_samp_long)
+
+summary(alevin1_model)
 ```
