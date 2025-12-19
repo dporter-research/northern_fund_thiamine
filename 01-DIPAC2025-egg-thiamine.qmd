@@ -1730,7 +1730,6 @@ alevin_init_sample_sheet <- "alevin-hatch-sampling"
 
 alevin_init_sample_data <- read_sheet(alevin_init_sample_data_url,
                                       sheet = alevin_init_sample_sheet)
-?pivot_longer
 
 alevin_init_samp_long <- alevin_init_sample_data |> 
   pivot_longer(
@@ -1779,10 +1778,6 @@ ggplot(data = alevin_init_samp_means, aes(x = factor(group), y = mean_mass_g)) +
               aes(x = factor(group), y = mean_mass_g,
                   color = id)) 
 
-ggplot(data = test) +
-  geom_violin(aes(x = factor(group), y = mm))
-
-str(alevin_init_sample_data)
 
 highest16 <- alevin_init_samp_long |> 
   filter(
@@ -1813,12 +1808,6 @@ countA <- alevin_init_samp_long |>
     allcount = n()
   )
 
-547/580
-
-test <- rnorm(1000, mean = mean, sd = sd)
-
-hist(test)
-
 ```
 
 ```{r}
@@ -1827,4 +1816,15 @@ hist(test)
 alevin1_model <- lmer(g ~ nmolT_g + (1+nmolT_g|id), data = alevin_init_samp_long)
 
 summary(alevin1_model)
+```
+
+
+```{r}
+#| label: dried-alevin-init
+
+alevin_init_sample_data_url <- "https://docs.google.com/spreadsheets/d/1USWhDAUBjClmPTshOR3Z_fBXyUgtNOcQHYwL3UTpEFE/edit?gid=1983306965#gid=1983306965"
+alevin_init_sample_sheet <- "alevin-hatch-sampling"
+
+
+
 ```
